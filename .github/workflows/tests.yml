@@ -1,0 +1,44 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: "Tests"
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.20.4
+
+    - name: Run unit tests
+      run: |
+        go install github.com/kyoh86/richgo@v0.3.12
+        set -o pipefail
+        go test ./... | richgo testfilter
+      env:
+        RICHGO_FORCE_COLOR: 1
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: v1.52
+        args: --issues-exit-code=1 --timeout 10m
+        only-new-issues: false
+        # the cache is already managed above, enabling it here
+        # gives errors when extracting
+        skip-pkg-cache: true
+        skip-build-cache: true
