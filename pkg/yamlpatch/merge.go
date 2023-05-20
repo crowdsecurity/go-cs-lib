@@ -28,8 +28,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/pkg/errors"
-
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -88,7 +86,7 @@ func YAML(sources [][]byte, strict bool) (*bytes.Buffer, error) {
 	}
 	enc := yaml.NewEncoder(buf)
 	if err := enc.Encode(merged); err != nil {
-		return nil, errors.Wrap(err, "couldn't re-serialize merged YAML")
+		return nil, fmt.Errorf("couldn't re-serialize merged YAML: %w", err)
 	}
 	return buf, nil
 }

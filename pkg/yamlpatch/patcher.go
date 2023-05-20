@@ -2,10 +2,11 @@ package yamlpatch
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io"
 	"os"
 
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -38,12 +39,12 @@ func readYAML(filePath string) ([]byte, error) {
 	var err error
 
 	if content, err = os.ReadFile(filePath); err != nil {
-		return nil, errors.Wrap(err, "while reading yaml file")
+		return nil, fmt.Errorf("while reading yaml file: %w", err)
 	}
 
 	var yamlMap map[interface{}]interface{}
 	if err = yaml.Unmarshal(content, &yamlMap); err != nil {
-		return nil, errors.Wrap(err, filePath)
+		return nil, fmt.Errorf("%s: %w", filePath, err)
 	}
 
 	return content, nil
@@ -111,12 +112,12 @@ func decodeDocuments(file *os.File, buf *bytes.Buffer, finalDashes bool) error {
 			if errors.Is(err, io.EOF) {
 				break
 			}
-			return errors.Wrapf(err, "while decoding %s", file.Name())
+			return fmt.Errorf("while decoding %s: %w", file.Name(), err)
 		}
 
 		docBytes, err = yaml.Marshal(&yml)
 		if err != nil {
-			return errors.Wrapf(err, "while marshaling %s", file.Name())
+			return fmt.Errorf("while marshaling %s: %w", file.Name(), err)
 		}
 
 		if dashTerminator {
@@ -146,7 +147,7 @@ func (p *Patcher) PrependedPatchContent() ([]byte, error) {
 	patchFile, err = os.Open(p.PatchFilePath)
 	// optional file, ignore if it does not exist
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return nil, errors.Wrapf(err, "while opening %s", p.PatchFilePath)
+		return nil, fmt.Errorf("while opening %s: %s", p.PatchFilePath, err)
 	}
 
 	if patchFile != nil {
@@ -162,7 +163,7 @@ func (p *Patcher) PrependedPatchContent() ([]byte, error) {
 
 	baseFile, err = os.Open(p.BaseFilePath)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while opening %s", p.BaseFilePath)
+		return nil, fmt.Errorf("while opening %s: %w", p.BaseFilePath, err)
 	}
 
 	if err = decodeDocuments(baseFile, &result, false); err != nil {
