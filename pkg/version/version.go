@@ -2,7 +2,6 @@ package version
 
 import (
 	"fmt"
-	"log"
 	"runtime"
 )
 
@@ -13,7 +12,7 @@ var (
 	GoVersion = runtime.Version()[2:] // = "1.13"
 )
 
-func ShowStr() string {
+func FullString() string {
 	ret := ""
 	ret += fmt.Sprintf("version: %s-%s\n", Version, Tag)
 	ret += fmt.Sprintf("BuildDate: %s\n", BuildDate)
@@ -21,12 +20,6 @@ func ShowStr() string {
 	return ret
 }
 
-func Show() {
-	log.Printf("version: %s-%s", Version, Tag)
-	log.Printf("BuildDate: %s", BuildDate)
-	log.Printf("GoVersion: %s", GoVersion)
-}
-
-func VersionStr() string {
+func String() string {
 	return fmt.Sprintf("%s-%s", Version, Tag)
 }
