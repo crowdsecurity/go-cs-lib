@@ -2,4 +2,8 @@
 
 package cstest
 
-const FileNotFoundMessage = "no such file or directory"
+const (
+	// these are the same on unix
+	FileNotFoundMessage = "no such file or directory"
+	PathNotFoundMessage = FileNotFoundMessage
+)
