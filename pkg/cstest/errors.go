@@ -3,13 +3,16 @@ package cstest
 import (
 	"strings"
 	"testing"
-	"text/template"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	logtest "github.com/sirupsen/logrus/hooks/test"
 )
+
+// The following functions are used to test for errors and log messages.
+// It would be nice to rely less on the content of error messages, and use a more
+// structured approach with error types, but that would require both test and code refactoring.
 
 func AssertErrorContains(t *testing.T, err error, expectedErr string) {
 	t.Helper()
@@ -79,21 +82,4 @@ func RequireLogContains(t *testing.T, hook *logtest.Hook, expected string) {
 	}
 
 	require.Fail(t, "no log entry found with message", expected)
-}
-
-// Interpolate fills a string template with the given values, can be map or struct.
-// example: Interpolate("{{.Name}}", map[string]string{"Name": "JohnDoe"})
-func Interpolate(s string, data interface{}) (string, error) {
-	tmpl, err := template.New("").Parse(s)
-	if err != nil {
-		return "", err
-	}
-
-	var b strings.Builder
-	err = tmpl.Execute(&b, data)
-	if err != nil {
-		return "", err
-	}
-
-	return b.String(), nil
 }
