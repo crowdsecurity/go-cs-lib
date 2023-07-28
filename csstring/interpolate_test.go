@@ -4,8 +4,8 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/crowdsecurity/go-cs-lib/pkg/csstring"
-	"github.com/crowdsecurity/go-cs-lib/pkg/cstest"
+	"github.com/crowdsecurity/go-cs-lib/csstring"
+	"github.com/crowdsecurity/go-cs-lib/cstest"
 )
 
 type person struct {
