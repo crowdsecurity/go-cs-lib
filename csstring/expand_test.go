@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/crowdsecurity/go-cs-lib/pkg/csstring"
+	"github.com/crowdsecurity/go-cs-lib/csstring"
 )
 
 func TestStrictExpand(t *testing.T) {
