@@ -77,7 +77,7 @@ func (p *Patcher) MergedPatchContent() ([]byte, error) {
 	if p.quiet {
 		logf = log.Debugf
 	}
-	logf("Patching yaml: '%s' with '%s'", p.BaseFilePath, p.PatchFilePath)
+	logf("Loading yaml file: '%s' with additional values from '%s'", p.BaseFilePath, p.PatchFilePath)
 
 	var patched *bytes.Buffer
 
