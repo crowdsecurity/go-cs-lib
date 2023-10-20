@@ -1,5 +1,6 @@
 package slicetools
 
+// Chunks splits a slice into chunks of the given size.
 func Chunks[T any](items []T, chunkSize int) [][]T {
 	// optimization for small slices
 	if len(items) <= chunkSize {
