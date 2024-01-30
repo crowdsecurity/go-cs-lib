@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/coreos/go-systemd/v22 v22.5.0
+	github.com/mattn/go-isatty v0.0.20
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v2 v2.4.0
