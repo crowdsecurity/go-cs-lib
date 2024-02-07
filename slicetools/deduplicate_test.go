@@ -33,6 +33,9 @@ func TestUniqueIntegers(t *testing.T) {
 			if len(got) > 0 {
 				assert.Equal(t, got, tc.slice[:len(got)], "Deduplicate should modify the original slice!")
 			}
+			for i := len(got); i < len(tc.slice); i++ {
+				assert.Equal(t, 0, tc.slice[i], "Deduplicate should zero out the remaining elements!")
+			}
 		})
 	}
 }

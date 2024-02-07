@@ -33,5 +33,12 @@ func Deduplicate[T comparable](slice []T) []T {
 			j++
 		}
 	}
+
+	// Zero elements from j to len(slice), like stdlib methods
+	var zero T // Default zero value for type T
+	for i := j; i < len(slice); i++ {
+		slice[i] = zero
+	}
+
 	return slice[:j]
 }
