@@ -6,16 +6,29 @@ import (
 )
 
 // Notify systemd that the service is ready.
+//
+// Deprecated: Use Notify instead.
 func NotifySystemd(log logrus.FieldLogger) error {
-	sent, err := daemon.SdNotify(false, daemon.SdNotifyReady)
+	return Notify(Ready, log)
+}
+
+const (
+	Ready = daemon.SdNotifyReady
+	Reloading = daemon.SdNotifyReloading
+	Stopping = daemon.SdNotifyStopping
+	Watchdog = daemon.SdNotifyWatchdog
+)
+
+// Notify systemd that the service is ready.
+func Notify(state string, log logrus.FieldLogger) error {
+	sent, err := daemon.SdNotify(false, state)
 	if sent {
-		log.Debug("Systemd notified")
+		log.Debugf("Systemd notified: %s", state)
 		return err
 	}
 	if err != nil {
-		log.Error("Failed to notify systemd: %w", err)
+		log.Errorf("Failed to notify systemd: %v", err)
 		return err
 	}
-	log.Debug("Not running under systemd")
 	return nil
 }

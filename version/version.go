@@ -8,6 +8,7 @@ import (
 var (
 	Version   string                  // = "v0.0.0"
 	BuildDate string                  // = "2023-03-06_09:55:34"
+	System    = runtime.GOOS          // = "linux", "windows", "docker" (when overriden by a Makefile)
 	Tag       string                  // = "dev"
 	GoVersion = runtime.Version()[2:] // = "1.13"
 )
