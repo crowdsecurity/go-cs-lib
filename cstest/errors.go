@@ -33,7 +33,9 @@ func AssertErrorMessage(t *testing.T, err error, expectedErr string) {
 		if err != nil {
 			errmsg = err.Error()
 		}
+
 		assert.Equal(t, expectedErr, errmsg)
+
 		return
 	}
 
@@ -59,7 +61,9 @@ func RequireErrorMessage(t *testing.T, err error, expectedErr string) {
 		if err != nil {
 			errmsg = err.Error()
 		}
+
 		require.Equal(t, expectedErr, errmsg)
+
 		return
 	}
 

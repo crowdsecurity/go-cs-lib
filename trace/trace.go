@@ -15,21 +15,26 @@ func WriteStackTrace(iErr interface{}) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if _, err := tmpfile.Write([]byte(fmt.Sprintf("error : %+v\n", iErr))); err != nil {
+
+	if _, err := fmt.Fprintf(tmpfile, "error : %+v\n", iErr); err != nil {
 		tmpfile.Close()
 		log.Fatal(err)
 	}
-	if _, err := tmpfile.Write([]byte(version.FullString())); err != nil {
+
+	if _, err := tmpfile.WriteString(version.FullString()); err != nil {
 		tmpfile.Close()
 		log.Fatal(err)
 	}
+
 	if _, err := tmpfile.Write(debug.Stack()); err != nil {
 		tmpfile.Close()
 		log.Fatal(err)
 	}
+
 	if err := tmpfile.Close(); err != nil {
 		log.Fatal(err)
 	}
+
 	return tmpfile.Name()
 }
 
@@ -38,6 +43,7 @@ func CatchPanic(component string) {
 	if r := recover(); r != nil {
 		log.Errorf("crowdsec - goroutine %s crashed : %s", component, r)
 		log.Errorf("please report this error to https://github.com/crowdsecurity/crowdsec/")
+
 		filename := WriteStackTrace(r)
 		log.Errorf("stacktrace/report is written to %s : please join it to your issue", filename)
 		log.Fatalf("crowdsec stopped")
