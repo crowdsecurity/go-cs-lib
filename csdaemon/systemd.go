@@ -26,9 +26,11 @@ func Notify(state string, log logrus.FieldLogger) error {
 		log.Debugf("Systemd notified: %s", state)
 		return err
 	}
+
 	if err != nil {
 		log.Errorf("Failed to notify systemd: %v", err)
 		return err
 	}
+
 	return nil
 }

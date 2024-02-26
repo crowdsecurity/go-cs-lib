@@ -14,8 +14,8 @@ func Interpolate(s string, data interface{}) (string, error) {
 	}
 
 	var b strings.Builder
-	err = tmpl.Execute(&b, data)
-	if err != nil {
+
+	if err := tmpl.Execute(&b, data); err != nil {
 		return "", err
 	}
 

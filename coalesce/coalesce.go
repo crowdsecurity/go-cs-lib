@@ -7,6 +7,7 @@ func String(s ...string) string {
 			return v
 		}
 	}
+
 	return ""
 }
 
@@ -17,6 +18,7 @@ func Int(s ...int) int {
 			return v
 		}
 	}
+
 	return 0
 }
 
@@ -27,6 +29,7 @@ func NotNil[T any](args ...*T) *T {
 			return arg
 		}
 	}
+
 	return nil
 }
 
@@ -40,6 +43,7 @@ func NotEmptyOrNil[T comparable](args ...*T) *T {
 			return arg
 		}
 	}
+
 	return nil
 }
 */

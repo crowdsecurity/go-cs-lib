@@ -34,15 +34,13 @@ func (p *Patcher) SetQuiet(quiet bool) {
 
 // read a single YAML file, check for errors (the merge package doesn't) then return the content as bytes.
 func readYAML(filePath string) ([]byte, error) {
-	var content []byte
-
-	var err error
-
-	if content, err = os.ReadFile(filePath); err != nil {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
 		return nil, fmt.Errorf("while reading yaml file: %w", err)
 	}
 
 	var yamlMap map[interface{}]interface{}
+
 	if err = yaml.Unmarshal(content, &yamlMap); err != nil {
 		return nil, fmt.Errorf("%s: %w", filePath, err)
 	}
@@ -53,18 +51,12 @@ func readYAML(filePath string) ([]byte, error) {
 // MergedPatchContent reads a YAML file and, if it exists, its patch file,
 // then merges them and returns it serialized.
 func (p *Patcher) MergedPatchContent() ([]byte, error) {
-	var err error
-
-	var base []byte
-
-	base, err = readYAML(p.BaseFilePath)
+	base, err := readYAML(p.BaseFilePath)
 	if err != nil {
 		return nil, err
 	}
 
-	var over []byte
-
-	over, err = readYAML(p.PatchFilePath)
+	over, err := readYAML(p.PatchFilePath)
 	if errors.Is(err, os.ErrNotExist) {
 		return base, nil
 	}
@@ -77,13 +69,12 @@ func (p *Patcher) MergedPatchContent() ([]byte, error) {
 	if p.quiet {
 		logf = log.Debugf
 	}
-	logf("Loading yaml file: '%s' with additional values from '%s'", p.BaseFilePath, p.PatchFilePath)
 
-	var patched *bytes.Buffer
+	logf("Loading yaml file: '%s' with additional values from '%s'", p.BaseFilePath, p.PatchFilePath)
 
 	// strict mode true, will raise errors for duplicate map keys and
 	// overriding with a different type
-	patched, err = YAML([][]byte{base, over}, true)
+	patched, err := YAML([][]byte{base, over}, true)
 	if err != nil {
 		return nil, err
 	}
@@ -94,11 +85,6 @@ func (p *Patcher) MergedPatchContent() ([]byte, error) {
 // read multiple YAML documents inside a file, and writes them to a buffer
 // separated by the appropriate '---' terminators.
 func decodeDocuments(file *os.File, buf *bytes.Buffer, finalDashes bool) error {
-	var (
-		err      error
-		docBytes []byte
-	)
-
 	dec := yaml.NewDecoder(file)
 	dec.SetStrict(true)
 
@@ -107,29 +93,33 @@ func decodeDocuments(file *os.File, buf *bytes.Buffer, finalDashes bool) error {
 	for {
 		yml := make(map[interface{}]interface{})
 
-		err = dec.Decode(&yml)
+		err := dec.Decode(&yml)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}
+
 			return fmt.Errorf("while decoding %s: %w", file.Name(), err)
 		}
 
-		docBytes, err = yaml.Marshal(&yml)
+		docBytes, err := yaml.Marshal(&yml)
 		if err != nil {
 			return fmt.Errorf("while marshaling %s: %w", file.Name(), err)
 		}
 
 		if dashTerminator {
-			buf.Write([]byte("---\n"))
+			buf.WriteString("---\n")
 		}
 
 		buf.Write(docBytes)
+
 		dashTerminator = true
 	}
+
 	if dashTerminator && finalDashes {
-		buf.Write([]byte("---\n"))
+		buf.WriteString("---\n")
 	}
+
 	return nil
 }
 
@@ -137,31 +127,29 @@ func decodeDocuments(file *os.File, buf *bytes.Buffer, finalDashes bool) error {
 // the content of the patch BEFORE the base document. The result is a multi-document
 // YAML in all cases, even if the base and patch files are single documents.
 func (p *Patcher) PrependedPatchContent() ([]byte, error) {
-	var (
-		result    bytes.Buffer
-		patchFile *os.File
-		baseFile  *os.File
-		err       error
-	)
-
-	patchFile, err = os.Open(p.PatchFilePath)
+	patchFile, err := os.Open(p.PatchFilePath)
 	// optional file, ignore if it does not exist
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return nil, fmt.Errorf("while opening %s: %s", p.PatchFilePath, err)
 	}
 
+	var result bytes.Buffer
+
 	if patchFile != nil {
 		if err = decodeDocuments(patchFile, &result, true); err != nil {
 			return nil, err
 		}
+
 		logf := log.Infof
+
 		if p.quiet {
 			logf = log.Debugf
 		}
+
 		logf("Prepending yaml: '%s' with '%s'", p.BaseFilePath, p.PatchFilePath)
 	}
 
-	baseFile, err = os.Open(p.BaseFilePath)
+	baseFile, err := os.Open(p.BaseFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("while opening %s: %w", p.BaseFilePath, err)
 	}
