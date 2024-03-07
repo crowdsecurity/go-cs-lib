@@ -17,6 +17,7 @@ func FullString() string {
 	ret := fmt.Sprintf("version: %s-%s\n", Version, Tag)
 	ret += fmt.Sprintf("BuildDate: %s\n", BuildDate)
 	ret += fmt.Sprintf("GoVersion: %s\n", GoVersion)
+	ret += fmt.Sprintf("Platform: %s\n", System)
 
 	return ret
 }
