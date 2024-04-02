@@ -1,0 +1,49 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/crowdsecurity/go-cs-lib/downloader"
+)
+
+func main() {
+	url := "https://raw.githubusercontent.com/crowdsecurity/crowdsec/master/cmd/crowdsec-cli/alerts.go"
+	myfile := "/tmp/foo/bar/baz/myfile"
+
+	client := http.Client{}
+
+	logHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})
+	d := downloader.New(url).
+		WithLogger(slog.New(logHandler)).
+		WithHTTPClient(client).
+		ToFile(myfile).
+		WithMakeDirs(true).
+		// WithETagFile(myfile+".etag").
+		WithETagFn(downloader.SHA256).
+		//		IfModifiedSince().
+		//		WithLastModified().
+		WithShelfLife(7*24*time.Hour).
+		WithMode(0o640).
+		LimitDownloadSize(1024*100).
+		VerifyHash("sha256", "6ed6e688e3e4c916ec310600e10d16883ee7a03c0e4c46e227ae5459902bf029")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	//	go func() {
+	//		time.Sleep(5 * time.Second)
+	//		cancel()
+	//	}()
+
+	downloaded, err := d.Download(ctx)
+	if err != nil {
+		fmt.Print(err, "\n")
+	}
+
+	fmt.Println("Downloaded: ", downloaded)
+}
