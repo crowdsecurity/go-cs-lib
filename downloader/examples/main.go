@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/http"
-	"os"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/crowdsecurity/go-cs-lib/downloader"
 )
@@ -17,9 +17,10 @@ func main() {
 
 	client := http.Client{}
 
-	logHandler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})
+	log.SetLevel(log.DebugLevel)
+
 	d := downloader.New(url).
-		WithLogger(slog.New(logHandler)).
+		WithLogger(log.StandardLogger().WithFields(log.Fields{"url": url})).
 		WithHTTPClient(client).
 		ToFile(myfile).
 		WithMakeDirs(true).

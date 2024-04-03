@@ -17,6 +17,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // NotFoundError returned by Download() when the remote resource is not found.
@@ -38,19 +40,11 @@ func (e BadHTTPCodeError) Error() string {
 	return fmt.Sprintf("bad HTTP code %d for %s", e.Code, e.URL)
 }
 
-type Logger interface {
-	Debug(msg string, keysAndValues ...any)
-	Info(msg string, keysAndValues ...any)
-	Warn(msg string, keysAndValues ...any)
-	Error(msg string, keysAndValues ...any)
+func nullLogger() *logrus.Entry {
+	log := logrus.New()
+	log.SetOutput(io.Discard)
+	return logrus.NewEntry(log)
 }
-
-type NullLogger struct{}
-
-func (l NullLogger) Debug(msg string, keysAndValues ...any) {}
-func (l NullLogger) Info(msg string, keysAndValues ...any)  {}
-func (l NullLogger) Warn(msg string, keysAndValues ...any)  {}
-func (l NullLogger) Error(msg string, keysAndValues ...any) {}
 
 // SHA256 returns the hash of the file if possible, empty string otherwise.
 func SHA256(path string) (string, error) {
@@ -75,7 +69,7 @@ func SHA256(path string) (string, error) {
 // Downloader fetches a file from a URL to a destination path, with various options.
 type Downloader struct {
 	// aligned with "betteralign -apply"
-	logger             Logger
+	logger             *logrus.Entry
 	etagFn             *func(string) (string, error)
 	etagPath           string
 	httpClient         http.Client
@@ -93,15 +87,16 @@ type Downloader struct {
 
 // New creates a new downloader for the given URL.
 func New(url string) *Downloader {
+	logger := nullLogger()
 	return &Downloader{
 		url:    url,
-		logger: NullLogger{},
+		logger: logger,
 	}
 }
 
 // WithLogger sets the logger for the downloader.
 // If not set, nothing will be logged.
-func (d *Downloader) WithLogger(logger Logger) *Downloader {
+func (d *Downloader) WithLogger(logger *logrus.Entry) *Downloader {
 	d.logger = logger
 	return d
 }
@@ -195,7 +190,7 @@ func (d *Downloader) getDestInfo() (time.Time, fs.FileMode) {
 	case os.IsNotExist(err):
 		return time.Time{}, 0
 	case err != nil:
-		d.logger.Error("Failed to stat destination file", "path", d.destPath, "error", err)
+		d.logger.Errorf("Failed to stat destination file %s: %s", d.destPath, err)
 		return time.Time{}, 0
 	}
 
@@ -232,25 +227,23 @@ func (d *Downloader) checkLastModified(ctx context.Context, modTime time.Time) (
 	remoteLastModified := resp.Header.Get("Last-Modified")
 	if remoteLastModified == "" {
 		if !localIsOld {
-			d.logger.Debug("No last modified header, but local file is not old",
-				"url", d.url, "path", d.destPath, "shelflife", d.shelfLife)
+			d.logger.Debugf("No last modified header, but local file is not old: %s",
+				d.destPath)
 			return true, nil
 		}
-	}
 
-	if remoteLastModified == "" {
-		d.logger.Debug("No last modified header", "url", d.url, "path", d.destPath)
+		d.logger.Debugf("No last modified header: %s", d.destPath)
 		return false, nil
 	}
 
 	lastAvailable, err := time.Parse(http.TimeFormat, remoteLastModified)
 	if err != nil {
-		d.logger.Error("Failed to parse last modified header", "url", d.url, "header", remoteLastModified, "error", err)
+		d.logger.Errorf("Failed to parse last modified header '%s': %s", remoteLastModified, err)
 	}
 
 	if modTime.After(lastAvailable) {
-		d.logger.Debug("Local file is newer than remote",
-			"url", d.url, "path", d.destPath, "local", modTime, "remote", lastAvailable)
+		d.logger.Debugf("Local file is newer than remote: %s (%s vs %s)",
+			d.destPath, modTime, lastAvailable)
 		return true, nil
 	}
 
@@ -368,19 +361,19 @@ func (d *Downloader) WithETagFile(etagPath string) *Downloader {
 }
 
 // storeETag writes the content of an ETag header to the file.
-func storeETag(resp *http.Response, etagPath string, logger Logger) {
+func storeETag(resp *http.Response, etagPath string, logger *logrus.Entry) {
 	if etagPath == "" {
 		return
 	}
 
 	etag := resp.Header.Get("ETag")
 	if etag == "" {
-		logger.Warn("No ETag header", "url", resp.Request.URL)
+		logger.Warn("No ETag header")
 		return
 	}
 
 	if err := os.WriteFile(etagPath, []byte(etag), 0o600); err != nil {
-		logger.Error("Failed to write ETag", "path", etagPath, "error", err)
+		logger.Errorf("Failed to write ETag to %s: %s", etagPath, err)
 	}
 }
 
@@ -393,13 +386,13 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("downloader options: %w", err)
 	}
 
-	d.logger.Debug("Downloading", "url", d.url, "destPath", d.destPath)
+	d.logger.Debugf("Checking %s", d.destPath)
 
 	destModTime, destFileMode := d.getDestInfo()
 
 	uptodate, err := d.checkLastModified(ctx, destModTime)
 	if err != nil {
-		d.logger.Warn("Failed to check last modified", "url", d.url, "error", err)
+		d.logger.Warnf("Failed to check last modified: %s", err)
 	}
 
 	if uptodate {
@@ -422,16 +415,13 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 	if d.etagFn != nil && (destModTime != time.Time{}) {
 		etag, err := (*d.etagFn)(d.destPath)
 		if err != nil {
-			d.logger.Warn("Failed to get etag", "url", d.url, "error", err)
+			d.logger.Warnf("Failed to get etag: %s", err)
 		}
 
 		if etag != "" {
 			req.Header.Add("If-None-Match", etag)
 		}
 	}
-
-	// NOTE: don't do this in prod -- don't log auth headers
-	// d.logger.Debug("Request", "url", d.url, "header", req.Header)
 
 	resp, err := d.httpClient.Do(req)
 	if err != nil {
@@ -446,7 +436,7 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 	case http.StatusOK:
 		break
 	case http.StatusNotModified:
-		d.logger.Debug("Not modified", "url", d.url)
+		d.logger.Debug("Not modified")
 		return false, nil
 	default:
 		return false, BadHTTPCodeError{d.url, resp.StatusCode}
@@ -457,7 +447,7 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 		if contentLengthStr != "" {
 			contentLength, err := strconv.ParseInt(contentLengthStr, 10, 64)
 			if err != nil {
-				d.logger.Warn("Failed to parse Content-Length header", "error", err)
+				d.logger.Warnf("Failed to parse Content-Length header: %s", err)
 			} else if contentLength > d.maxSize {
 				return false, fmt.Errorf(
 					"refusing to download file larger than %d bytes: Content-Length=%d",
@@ -468,9 +458,7 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 
 	reader := resp.Body
 
-	// uncompress
-
-	if !resp.Uncompressed {
+	if resp.Header.Get("Content-Encoding") == "gzip" {
 		gzipReader, err := gzip.NewReader(reader)
 		if err != nil {
 			return false, fmt.Errorf("failed to create gzip reader: %w", err)
@@ -537,7 +525,7 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 		return false, fmt.Errorf("while writing to %s: %w", tmpFileName, err)
 	}
 
-	d.logger.Debug("Written", "file", d.destPath, "bytes", written)
+	d.logger.Debugf("Written %d bytes to %s", written, d.destPath)
 
 	if hasher != nil {
 		got := hex.EncodeToString(hasher.Sum(nil))
