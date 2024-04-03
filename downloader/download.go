@@ -73,7 +73,7 @@ type Downloader struct {
 	logger             *logrus.Entry
 	etagFn             *func(string) (string, error)
 	etagPath           string
-	httpClient         http.Client
+	httpClient         *http.Client
 	url                string
 	destPath           string
 	verifyHashFunction string
@@ -172,7 +172,7 @@ func (d *Downloader) WithMode(mode os.FileMode) *Downloader {
 }
 
 // WithHTTPClient sets the http client for the downloader.
-func (d *Downloader) WithHTTPClient(client http.Client) *Downloader {
+func (d *Downloader) WithHTTPClient(client *http.Client) *Downloader {
 	d.httpClient = client
 	return d
 }
@@ -216,7 +216,12 @@ func (d *Downloader) checkLastModified(ctx context.Context, modTime time.Time) (
 		return false, fmt.Errorf("failed to create HEAD request for %s: %w", d.url, err)
 	}
 
-	resp, err := d.httpClient.Do(req)
+	client := d.httpClient
+	if client == nil {
+		client = http.DefaultClient
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return false, fmt.Errorf("failed to make HEAD request for %s: %w", d.url, err)
 	}
