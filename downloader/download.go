@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"bytes"
 	"compress/gzip"
 	"context"
 	"crypto"
@@ -83,6 +84,7 @@ type Downloader struct {
 	makeDirs           bool
 	ifModifiedSince    bool
 	lastModified       bool
+	compareContent     bool
 }
 
 // New creates a new downloader for the given URL.
@@ -377,6 +379,57 @@ func storeETag(resp *http.Response, etagPath string, logger *logrus.Entry) {
 	}
 }
 
+// CompareContent sets the downloader to compare the content after download with
+// the previous file at the destination path. If the content is the same, the old
+// file will stay in place and be reported as up to date. This is useful when there
+// is no other way to check (ETag, Last-Modified...).
+func (d *Downloader) CompareContent() *Downloader {
+	d.compareContent = true
+	return d
+}
+
+// compareFiles compares the content of two files and returns true if they are identical.
+func compareFiles(file1, file2 string) (bool, error) {
+	// NOTE: could be (micro) optimized by comparing sizes first
+	f1, err := os.Open(file1)
+	switch {
+	case os.IsNotExist(err):
+		return false, nil
+	case err != nil:
+		return false, err
+	}
+	defer f1.Close()
+
+	f2, err := os.Open(file2)
+	switch {
+	case os.IsNotExist(err):
+		return false, nil
+	case err != nil:
+		return false, err
+	}
+	defer f2.Close()
+
+	const bufSize = 4096
+	buf1 := make([]byte, bufSize)
+	buf2 := make([]byte, bufSize)
+
+	for {
+		n1, err1 := f1.Read(buf1)
+		n2, err2 := f2.Read(buf2)
+
+		switch {
+		case err1 == io.EOF && err2 == io.EOF:
+			return true, nil
+		case err1 == io.EOF || err2 == io.EOF || err1 != err2:
+			return false, nil
+		case err1 != nil || err2 != nil:
+			return false, fmt.Errorf("read failed: %v / %v", err1, err2)
+		case n1 != n2 || !bytes.Equal(buf1[:n1], buf2[:n2]):
+			return false, nil
+		}
+	}
+}
+
 // Download downloads the file from the URL to the destination path.
 // Returns true if the file was downloaded, false if it was already up to date.
 func (d *Downloader) Download(ctx context.Context) (bool, error) {
@@ -543,6 +596,17 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 	}
 
 	storeETag(resp, d.etagPath, d.logger)
+
+	if d.compareContent {
+		same, err := compareFiles(d.destPath, tmpFileName)
+		if err != nil {
+			d.logger.Errorf("Failed to compare files: %s", err)
+		}
+		if same {
+			d.logger.Debugf("Content is the same, not replacing %s", d.destPath)
+			return false, nil
+		}
+	}
 
 	if err = os.Rename(tmpFileName, d.destPath); err != nil {
 		return false, err

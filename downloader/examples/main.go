@@ -31,6 +31,7 @@ func main() {
 		WithShelfLife(7*24*time.Hour).
 		WithMode(0o640).
 		LimitDownloadSize(1024*100).
+		CompareContent().
 		VerifyHash("sha256", "6ed6e688e3e4c916ec310600e10d16883ee7a03c0e4c46e227ae5459902bf029")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
