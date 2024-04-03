@@ -21,7 +21,7 @@ func main() {
 
 	d := downloader.New(url).
 		WithLogger(log.StandardLogger().WithFields(log.Fields{"url": url})).
-		WithHTTPClient(client).
+		WithHTTPClient(&client).
 		ToFile(myfile).
 		WithMakeDirs(true).
 		// WithETagFile(myfile+".etag").

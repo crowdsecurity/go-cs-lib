@@ -605,10 +605,15 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 	if d.compareContent {
 		same, err := compareFiles(d.destPath, tmpFileName)
 		if err != nil {
-			d.logger.Errorf("Failed to compare files: %s", err)
+			d.logger.Errorf("Failed to compare files, assuming different: %s", err)
 		}
 		if same {
 			d.logger.Debugf("Content is the same, not replacing %s", d.destPath)
+			// still, we need to update the modification time
+			now := time.Now()
+			if err = os.Chtimes(d.destPath, now, now); err != nil {
+				return false, err
+			}
 			return false, nil
 		}
 	}
