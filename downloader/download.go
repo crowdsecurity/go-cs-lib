@@ -620,12 +620,15 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 	}
 
 	if runtime.GOOS == "windows" {
-		// remove the file before renaming it
-		if _, err := os.Stat(d.destPath); err == nil {
-			if err = os.Remove(d.destPath); err != nil {
-				d.logger.Errorf("Failed to remove destination file before renaming: %s", err)
-				return false, err
-			}
+		// On Windows, rename will fail if the destination file already exists
+		// so we remove it first.
+		err = os.Remove(d.destPath)
+		switch {
+		case errors.Is(err, fs.ErrNotExist):
+			break
+		case err != nil:
+			d.logger.Errorf("Failed to remove destination file before renaming: %s", err)
+			return false, err
 		}
 	}
 
