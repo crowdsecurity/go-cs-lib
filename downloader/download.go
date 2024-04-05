@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -615,6 +616,16 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 				return false, err
 			}
 			return false, nil
+		}
+	}
+
+	if runtime.GOOS == "windows" {
+		// remove the file before renaming it
+		if _, err := os.Stat(d.destPath); err == nil {
+			if err = os.Remove(d.destPath); err != nil {
+				d.logger.Errorf("Failed to remove destination file before renaming: %s", err)
+				return false, err
+			}
 		}
 	}
 
