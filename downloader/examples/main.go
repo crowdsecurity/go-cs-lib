@@ -19,12 +19,12 @@ func main() {
 
 	log.SetLevel(log.DebugLevel)
 
-	d := downloader.New(url).
+	d := downloader.New().
 		WithLogger(log.StandardLogger().WithFields(log.Fields{"url": url})).
 		WithHTTPClient(&client).
 		ToFile(myfile).
 		WithMakeDirs(true).
-		// WithETagFile(myfile+".etag").
+		//		WithETagFile(myfile+".etag").
 		WithETagFn(downloader.SHA256).
 		//		IfModifiedSince().
 		//		WithLastModified().
@@ -42,7 +42,7 @@ func main() {
 	//		cancel()
 	//	}()
 
-	downloaded, err := d.Download(ctx)
+	downloaded, err := d.Download(ctx, url)
 	if err != nil {
 		fmt.Print(err, "\n")
 	}

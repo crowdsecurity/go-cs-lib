@@ -75,7 +75,6 @@ type Downloader struct {
 	etagFn             *func(string) (string, error)
 	etagPath           string
 	httpClient         *http.Client
-	url                string
 	destPath           string
 	verifyHashFunction string
 	verifyHashValue    string
@@ -89,11 +88,11 @@ type Downloader struct {
 }
 
 // New creates a new downloader for the given URL.
-func New(url string) *Downloader {
+func New() *Downloader {
 	logger := nullLogger()
 	return &Downloader{
-		url:    url,
 		logger: logger,
+		httpClient: http.DefaultClient,
 	}
 }
 
@@ -201,7 +200,7 @@ func (d *Downloader) getDestInfo() (time.Time, fs.FileMode) {
 }
 
 // checkLastModified returns true if the file seems up to date according to its modification time.
-func (d *Downloader) checkLastModified(ctx context.Context, modTime time.Time) (bool, error) {
+func (d *Downloader) checkLastModified(ctx context.Context, url string, modTime time.Time) (bool, error) {
 	if !d.lastModified {
 		return false, nil
 	}
@@ -212,9 +211,9 @@ func (d *Downloader) checkLastModified(ctx context.Context, modTime time.Time) (
 		localIsOld = modTime.Add(d.shelfLife).Before(time.Now())
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, d.url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
 	if err != nil {
-		return false, fmt.Errorf("failed to create HEAD request for %s: %w", d.url, err)
+		return false, fmt.Errorf("failed to create HEAD request for %s: %w", url, err)
 	}
 
 	client := d.httpClient
@@ -224,12 +223,12 @@ func (d *Downloader) checkLastModified(ctx context.Context, modTime time.Time) (
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return false, fmt.Errorf("failed to make HEAD request for %s: %w", d.url, err)
+		return false, fmt.Errorf("failed to make HEAD request for %s: %w", url, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return false, BadHTTPCodeError{d.url, resp.StatusCode}
+		return false, BadHTTPCodeError{url, resp.StatusCode}
 	}
 
 	remoteLastModified := resp.Header.Get("Last-Modified")
@@ -283,10 +282,6 @@ func (d *Downloader) selectHashFunction() (hash.Hash, error) {
 func (d *Downloader) ValidateOptions() error {
 	// for the better or worse, due to method chaining we must
 	// put all checks in the only place where we can return an error
-
-	if d.url == "" {
-		return errors.New("url must be set")
-	}
 
 	if d.destPath == "" {
 		return errors.New("destination path must be set")
@@ -438,7 +433,7 @@ func compareFiles(file1, file2 string) (bool, error) {
 
 // Download downloads the file from the URL to the destination path.
 // Returns true if the file was downloaded, false if it was already up to date.
-func (d *Downloader) Download(ctx context.Context) (bool, error) {
+func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 	// only one of etagfn, ifmod, lastmod
 
 	if err := d.ValidateOptions(); err != nil {
@@ -449,7 +444,7 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 
 	destModTime, destFileMode := d.getDestInfo()
 
-	uptodate, err := d.checkLastModified(ctx, destModTime)
+	uptodate, err := d.checkLastModified(ctx, url, destModTime)
 	if err != nil {
 		d.logger.Warnf("Failed to check last modified: %s", err)
 	}
@@ -458,9 +453,9 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 		return false, nil
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, d.url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return false, fmt.Errorf("failed to create http request for %s: %w", d.url, err)
+		return false, fmt.Errorf("failed to create http request for %s: %w", url, err)
 	}
 
 	req.Header.Add("Accept-Encoding", "gzip")
@@ -484,21 +479,21 @@ func (d *Downloader) Download(ctx context.Context) (bool, error) {
 
 	resp, err := d.httpClient.Do(req)
 	if err != nil {
-		return false, fmt.Errorf("failed http request for %s: %w", d.url, err)
+		return false, fmt.Errorf("failed http request for %s: %w", url, err)
 	}
 
 	defer resp.Body.Close()
 
 	switch resp.StatusCode {
 	case http.StatusNotFound:
-		return false, NotFoundError{d.url}
+		return false, NotFoundError{url}
 	case http.StatusOK:
 		break
 	case http.StatusNotModified:
 		d.logger.Debug("Not modified")
 		return false, nil
 	default:
-		return false, BadHTTPCodeError{d.url, resp.StatusCode}
+		return false, BadHTTPCodeError{url, resp.StatusCode}
 	}
 
 	if d.maxSize > 0 {
