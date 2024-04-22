@@ -21,8 +21,14 @@ import (
 // Init is called after reading the configuration to set a persistent location.
 // (i.e. config_paths.data_dir should be persistent even within containers)
 // If not called, the default is /tmp or equivalent
-func Init(dir string) {
+func Init(dir string) error {
+	err := os.MkdirAll(dir, 0700)
+	if err != nil {
+		return err
+	}
 	keeper.dir = dir
+
+	return nil
 }
 
 // CatchPanic should be called from all go-routines to ensure proper stack trace reporting
