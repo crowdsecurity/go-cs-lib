@@ -60,6 +60,8 @@ func TestDownloadToFile(t *testing.T) {
 	downloaded, err = d.Download(ctx, ts.URL+"/testfile_missing")
 
 	require.False(t, downloaded)
+
 	var notfound downloader.NotFoundError
-	require.ErrorAs(t, err, &notfound, "document not found at " + ts.URL + "/testfile_missing")
+
+	require.ErrorAs(t, err, &notfound, "document not found at "+ts.URL+"/testfile_missing")
 }

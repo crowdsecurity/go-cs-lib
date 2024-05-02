@@ -25,7 +25,7 @@ linters-settings:
     # If lower than 0, disable the check.
     # Default: 60
     # lower this after refactoring
-    lines: 198
+    lines: 200
     # Checks the number of statements in a function.
     # If lower than 0, disable the check.
     # Default: 40

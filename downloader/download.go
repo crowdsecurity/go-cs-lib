@@ -45,12 +45,14 @@ func (e BadHTTPCodeError) Error() string {
 func nullLogger() *logrus.Entry {
 	log := logrus.New()
 	log.SetOutput(io.Discard)
+
 	return logrus.NewEntry(log)
 }
 
 // SHA256 returns the hash of the file if possible, empty string otherwise.
 func SHA256(path string) (string, error) {
 	file, err := os.Open(path)
+
 	switch {
 	case os.IsNotExist(err):
 		// first time download
@@ -58,6 +60,7 @@ func SHA256(path string) (string, error) {
 	case err != nil:
 		return "", err
 	}
+
 	defer file.Close()
 
 	hash := crypto.SHA256.New()
@@ -90,8 +93,9 @@ type Downloader struct {
 // New creates a new downloader for the given URL.
 func New() *Downloader {
 	logger := nullLogger()
+
 	return &Downloader{
-		logger: logger,
+		logger:     logger,
 		httpClient: http.DefaultClient,
 	}
 }
@@ -188,6 +192,7 @@ func (d *Downloader) LimitDownloadSize(size int64) *Downloader {
 // getDestInfo returns the modification time and file mode of the destination file.
 func (d *Downloader) getDestInfo() (time.Time, fs.FileMode) {
 	dstInfo, err := os.Stat(d.destPath)
+
 	switch {
 	case os.IsNotExist(err):
 		return time.Time{}, 0
@@ -240,6 +245,7 @@ func (d *Downloader) checkLastModified(ctx context.Context, url string, modTime 
 		}
 
 		d.logger.Debugf("No last modified header: %s", d.destPath)
+
 		return false, nil
 	}
 
@@ -282,7 +288,6 @@ func (d *Downloader) selectHashFunction() (hash.Hash, error) {
 func (d *Downloader) ValidateOptions() error {
 	// for the better or worse, due to method chaining we must
 	// put all checks in the only place where we can return an error
-
 	if d.destPath == "" {
 		return errors.New("destination path must be set")
 	}
@@ -393,21 +398,25 @@ func (d *Downloader) CompareContent() *Downloader {
 func compareFiles(file1, file2 string) (bool, error) {
 	// NOTE: could be (micro) optimized by comparing sizes first
 	f1, err := os.Open(file1)
+
 	switch {
 	case os.IsNotExist(err):
 		return false, nil
 	case err != nil:
 		return false, err
 	}
+
 	defer f1.Close()
 
 	f2, err := os.Open(file2)
+
 	switch {
 	case os.IsNotExist(err):
 		return false, nil
 	case err != nil:
 		return false, err
 	}
+
 	defer f2.Close()
 
 	const bufSize = 4096
@@ -435,7 +444,6 @@ func compareFiles(file1, file2 string) (bool, error) {
 // Returns true if the file was downloaded, false if it was already up to date.
 func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 	// only one of etagfn, ifmod, lastmod
-
 	if err := d.ValidateOptions(); err != nil {
 		return false, fmt.Errorf("downloader options: %w", err)
 	}
@@ -603,6 +611,7 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 		if err != nil {
 			d.logger.Errorf("Failed to compare files, assuming different: %s", err)
 		}
+
 		if same {
 			d.logger.Debugf("Content is the same, not replacing %s", d.destPath)
 			// still, we need to update the modification time
@@ -610,6 +619,7 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 			if err = os.Chtimes(d.destPath, now, now); err != nil {
 				return false, err
 			}
+
 			return false, nil
 		}
 	}
@@ -618,6 +628,7 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 		// On Windows, rename will fail if the destination file already exists
 		// so we remove it first.
 		err = os.Remove(d.destPath)
+
 		switch {
 		case errors.Is(err, fs.ErrNotExist):
 			break
