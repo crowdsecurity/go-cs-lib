@@ -321,7 +321,3 @@ issues:
     - linters:
         - errorlint
       text: "non-wrapping format verb for fmt.Errorf. Use `%w` to format errors"
-
-    - linters:
-        - errorlint
-      text: "comparing with .* will fail on wrapped errors. Use errors.Is to check for a specific error"

@@ -419,12 +419,12 @@ func compareFiles(file1, file2 string) (bool, error) {
 		n2, err2 := f2.Read(buf2)
 
 		switch {
-		case err1 == io.EOF && err2 == io.EOF:
+		case errors.Is(err1, io.EOF) && errors.Is(err2, io.EOF):
 			return true, nil
-		case err1 == io.EOF || err2 == io.EOF || err1 != err2:
+		case errors.Is(err1, io.EOF) || errors.Is(err2, io.EOF):
 			return false, nil
 		case err1 != nil || err2 != nil:
-			return false, fmt.Errorf("read failed: %v / %v", err1, err2)
+			return false, fmt.Errorf("read failed: %w / %w", err1, err2)
 		case n1 != n2 || !bytes.Equal(buf1[:n1], buf2[:n2]):
 			return false, nil
 		}
