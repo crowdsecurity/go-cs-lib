@@ -186,6 +186,7 @@ func TestMergedPatchContent(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
+
 			dirPath, err := os.MkdirTemp("", "yamlpatch")
 			require.NoError(t, err)
 
@@ -289,6 +290,7 @@ func TestPrependedPatchContent(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
+
 			dirPath, err := os.MkdirTemp("", "yamlpatch")
 			require.NoError(t, err)
 

@@ -22,10 +22,11 @@ import (
 // (i.e. config_paths.data_dir should be persistent even within containers)
 // If not called, the default is /tmp or equivalent
 func Init(dir string) error {
-	err := os.MkdirAll(dir, 0700)
+	err := os.MkdirAll(dir, 0o700)
 	if err != nil {
 		return err
 	}
+
 	keeper.dir = dir
 
 	return nil

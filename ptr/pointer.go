@@ -29,7 +29,9 @@ func OrEmpty[T any](t *T) T {
 	if t != nil {
 		return *t
 	}
+
 	var empty T
+
 	return empty
 }
 
@@ -38,6 +40,7 @@ func OrDefault[T any](t *T, def T) T {
 	if t != nil {
 		return *t
 	}
+
 	return def
 }
 

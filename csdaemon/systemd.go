@@ -13,10 +13,10 @@ func NotifySystemd(log logrus.FieldLogger) error {
 }
 
 const (
-	Ready = daemon.SdNotifyReady
+	Ready     = daemon.SdNotifyReady
 	Reloading = daemon.SdNotifyReloading
-	Stopping = daemon.SdNotifyStopping
-	Watchdog = daemon.SdNotifyWatchdog
+	Stopping  = daemon.SdNotifyStopping
+	Watchdog  = daemon.SdNotifyWatchdog
 )
 
 // Notify systemd that the service is ready.

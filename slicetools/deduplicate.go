@@ -6,14 +6,18 @@ func UniqueCopy[T comparable](slice []T) []T {
 	if slice == nil {
 		return nil
 	}
+
 	seen := make(map[T]struct{})
 	ret := make([]T, 0, len(slice))
+
 	for _, value := range slice {
 		if _, ok := seen[value]; !ok {
 			seen[value] = struct{}{}
+
 			ret = append(ret, value)
 		}
 	}
+
 	return ret
 }
 
@@ -24,8 +28,10 @@ func Deduplicate[T comparable](slice []T) []T {
 	if slice == nil {
 		return nil
 	}
+
 	seen := make(map[T]struct{})
 	j := 0
+
 	for _, value := range slice {
 		if _, ok := seen[value]; !ok {
 			seen[value] = struct{}{}

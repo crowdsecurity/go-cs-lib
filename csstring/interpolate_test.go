@@ -2,6 +2,7 @@ package csstring_test
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/crowdsecurity/go-cs-lib/csstring"

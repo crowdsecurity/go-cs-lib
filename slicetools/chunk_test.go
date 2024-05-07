@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/crowdsecurity/go-cs-lib/slicetools"
 )
 
@@ -14,7 +15,7 @@ func TestChunks(t *testing.T) {
 		chunkSize int
 		expected  [][]int
 	}{
-		{ "empty slice, chunk size 2", []int{}, 2, [][]int{}},
+		{"empty slice, chunk size 2",  []int{}, 2, [][]int{}},
 		{"1 element, chunk size 2",    []int{1}, 2, [][]int{{1}}},
 		{"empty slice, chunk size 0",  []int{}, 0, [][]int{}},
 		{"5 elements, chunk size 2",   []int{1, 2, 3, 4, 5}, 2, [][]int{{1, 2}, {3, 4}, {5}}},

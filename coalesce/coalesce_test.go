@@ -60,6 +60,7 @@ func TestNotNil(t *testing.T) {
 				require.Nil(t, got)
 				return
 			}
+
 			require.NotNil(t, got)
 			assert.Equal(t, *tc.want, *got)
 		})
