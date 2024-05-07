@@ -14,23 +14,21 @@ import (
 type Patcher struct {
 	BaseFilePath  string
 	PatchFilePath string
-	quiet bool
+	quiet         bool
 }
 
 func NewPatcher(filePath string, suffix string) *Patcher {
 	return &Patcher{
 		BaseFilePath:  filePath,
 		PatchFilePath: filePath + suffix,
-		quiet: false,
+		quiet:         false,
 	}
 }
-
 
 // SetQuiet sets the quiet flag, which will log as DEBUG_LEVEL instead of INFO
 func (p *Patcher) SetQuiet(quiet bool) {
 	p.quiet = quiet
 }
-
 
 // read a single YAML file, check for errors (the merge package doesn't) then return the content as bytes.
 func readYAML(filePath string) ([]byte, error) {

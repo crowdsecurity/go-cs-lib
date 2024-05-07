@@ -2,6 +2,7 @@ package slicetools
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,15 +25,18 @@ func TestUniqueIntegers(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			got := UniqueCopy(tc.slice)
 			assert.Equal(t, tc.want, got)
+
 			if len(got) > 0 {
 				assert.NotEqual(t, got, tc.slice[:len(got)], "UniqueCopy should not modify the original slice!")
 			}
 
 			got = Deduplicate(tc.slice)
 			assert.Equal(t, tc.want, got)
+
 			if len(got) > 0 {
 				assert.Equal(t, got, tc.slice[:len(got)], "Deduplicate should modify the original slice!")
 			}
+
 			for i := len(got); i < len(tc.slice); i++ {
 				assert.Equal(t, 0, tc.slice[i], "Deduplicate should zero out the remaining elements!")
 			}
