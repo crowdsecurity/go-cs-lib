@@ -3,6 +3,7 @@ package version
 import (
 	"fmt"
 	"runtime"
+	"strings"
 )
 
 var (
@@ -14,7 +15,7 @@ var (
 )
 
 func FullString() string {
-	ret := fmt.Sprintf("version: %s-%s\n", Version, Tag)
+	ret := fmt.Sprintf("version: %s\n", String())
 	ret += fmt.Sprintf("BuildDate: %s\n", BuildDate)
 	ret += fmt.Sprintf("GoVersion: %s\n", GoVersion)
 	ret += fmt.Sprintf("Platform: %s\n", System)
@@ -23,5 +24,12 @@ func FullString() string {
 }
 
 func String() string {
-	return fmt.Sprintf("%s-%s", Version, Tag)
+	// if the version number already contains the tag, don't duplicate it
+	ret := Version
+
+	if !strings.HasSuffix(ret, Tag) && !strings.HasSuffix(ret, "g"+Tag+"-dirty") {
+		ret += "-" + Tag
+	}
+
+	return ret
 }
