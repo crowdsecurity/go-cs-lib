@@ -3,6 +3,7 @@ module github.com/crowdsecurity/go-cs-lib
 go 1.20
 
 require (
+	github.com/blackfireio/osinfo v1.0.5
 	github.com/coreos/go-systemd/v22 v22.5.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.4
