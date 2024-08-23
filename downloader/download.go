@@ -247,6 +247,10 @@ func (d *Downloader) isLocalFresh(ctx context.Context, url string, modTime time.
 		return false, BadHTTPCodeError{url, resp.StatusCode}
 	}
 
+	if !d.lastModified {
+		return false, nil
+	}
+
 	remoteLastModified := resp.Header.Get("Last-Modified")
 	if remoteLastModified == "" {
 		if !localIsOld {
