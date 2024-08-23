@@ -519,18 +519,8 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 		return false, BadHTTPCodeError{url, resp.StatusCode}
 	}
 
-	if d.maxSize > 0 {
-		contentLengthStr := resp.Header.Get("Content-Length")
-		if contentLengthStr != "" {
-			contentLength, err := strconv.ParseInt(contentLengthStr, 10, 64)
-			if err != nil {
-				d.logger.Warnf("Failed to parse Content-Length header: %s", err)
-			} else if contentLength > d.maxSize {
-				return false, fmt.Errorf(
-					"refusing to download file larger than %d bytes: Content-Length=%d",
-					d.maxSize, contentLength)
-			}
-		}
+	if d.enforceMaxSize(resp) != nil {
+		return false, err
 	}
 
 	reader := resp.Body
@@ -658,4 +648,27 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (d *Downloader) enforceMaxSize(resp *http.Response) error {
+	if d.maxSize == 0 {
+		return nil
+	}
+
+	contentLengthStr := resp.Header.Get("Content-Length")
+	if contentLengthStr == "" {
+		return nil
+	}
+
+	contentLength, err := strconv.ParseInt(contentLengthStr, 10, 64)
+	if err != nil {
+		d.logger.Warnf("failed to parse Content-Length header: %s", err)
+	}
+
+	if d.maxSize > 0 && contentLength > d.maxSize {
+		return fmt.Errorf("refusing to download file larger than %d bytes: Content-Length=%d",
+			d.maxSize, contentLength)
+	}
+
+	return nil
 }
