@@ -49,7 +49,7 @@ func nullLogger() *logrus.Entry {
 	return logrus.NewEntry(log)
 }
 
-// SHA256 returns the hash of the file if possible, empty string otherwise.
+// SHA256 returns the (hex-encoded) hash of the file if possible, empty string otherwise.
 func SHA256(path string) (string, error) {
 	file, err := os.Open(path)
 
@@ -204,9 +204,10 @@ func (d *Downloader) getDestInfo() (time.Time, fs.FileMode) {
 	return dstInfo.ModTime(), dstInfo.Mode().Perm()
 }
 
-// checkLastModified returns true if the file seems up to date according to its modification time.
-func (d *Downloader) checkLastModified(ctx context.Context, url string, modTime time.Time) (bool, error) {
-	if !d.lastModified {
+// isLocalFresh returns whether we can skip the download, according to mtime and etag values, when set.
+// If neither is set, the file is considered stale after the shelf life period.
+func (d *Downloader) isLocalFresh(ctx context.Context, url string, modTime time.Time, etag string) (bool, error) {
+	if !d.lastModified && d.etagFn == nil {
 		return false, nil
 	}
 
@@ -221,6 +222,10 @@ func (d *Downloader) checkLastModified(ctx context.Context, url string, modTime 
 		return false, fmt.Errorf("failed to create HEAD request for %s: %w", url, err)
 	}
 
+	if etag != "" {
+		req.Header.Add("If-None-Match", etag)
+	}
+
 	client := d.httpClient
 	if client == nil {
 		client = http.DefaultClient
@@ -232,7 +237,13 @@ func (d *Downloader) checkLastModified(ctx context.Context, url string, modTime 
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	switch resp.StatusCode {
+	case http.StatusNotModified:
+		d.logger.Debug("Not modified (head)")
+		return true, nil
+	case http.StatusOK:
+		break
+	default:
 		return false, BadHTTPCodeError{url, resp.StatusCode}
 	}
 
@@ -452,7 +463,18 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 
 	destModTime, destFileMode := d.getDestInfo()
 
-	uptodate, err := d.checkLastModified(ctx, url, destModTime)
+	etag := ""
+	// only add If-None-Match if destPath exists, it could have been deleted leaving an .etag
+	if d.etagFn != nil && (destModTime != time.Time{}) {
+		var err error
+
+		etag, err = (*d.etagFn)(d.destPath)
+		if err != nil {
+			d.logger.Warnf("Failed to get etag: %s", err)
+		}
+	}
+
+	uptodate, err := d.isLocalFresh(ctx, url, destModTime, etag)
 	if err != nil {
 		d.logger.Warnf("Failed to check last modified: %s", err)
 	}
@@ -470,19 +492,12 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 
 	if d.ifModifiedSince && (destModTime != time.Time{}) {
 		req.Header.Add("If-Modified-Since", destModTime.Format(http.TimeFormat))
+		d.logger.Trace("If-Modified-Since: ", destModTime)
 	}
 
-	// only add If-None-Match if destPath exists,
-	// it could have been deleted leaving an .etag
-	if d.etagFn != nil && (destModTime != time.Time{}) {
-		etag, err := (*d.etagFn)(d.destPath)
-		if err != nil {
-			d.logger.Warnf("Failed to get etag: %s", err)
-		}
-
-		if etag != "" {
-			req.Header.Add("If-None-Match", etag)
-		}
+	if etag != "" {
+		req.Header.Add("If-None-Match", etag)
+		d.logger.Trace("If-None-Match: ", etag)
 	}
 
 	resp, err := d.httpClient.Do(req)
@@ -498,7 +513,7 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 	case http.StatusOK:
 		break
 	case http.StatusNotModified:
-		d.logger.Debug("Not modified")
+		d.logger.Debug("Not modified (get)")
 		return false, nil
 	default:
 		return false, BadHTTPCodeError{url, resp.StatusCode}
