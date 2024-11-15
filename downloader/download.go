@@ -88,6 +88,8 @@ type Downloader struct {
 	ifModifiedSince    bool
 	lastModified       bool
 	compareContent     bool
+	beforeRequest      func(*http.Request)
+	afterRequest       func(*http.Response)
 }
 
 // New creates a new downloader for the given URL.
@@ -186,6 +188,20 @@ func (d *Downloader) WithHTTPClient(client *http.Client) *Downloader {
 // while uncompressing the payload.
 func (d *Downloader) LimitDownloadSize(size int64) *Downloader {
 	d.maxSize = size
+	return d
+}
+
+// BeforeRequest sets a function to run before making the HTTP request.
+// This can be used to add headers, show user feedback, etc.
+func (d *Downloader) BeforeRequest(fn func(*http.Request)) *Downloader {
+	d.beforeRequest = fn
+	return d
+}
+
+// AfterRequest sets a function to run after the HTTP request has been made.
+// This can be used to check the response, save cookies, etc.
+func (d *Downloader) AfterRequest(fn func(*http.Response)) *Downloader {
+	d.afterRequest = fn
 	return d
 }
 
@@ -455,6 +471,22 @@ func compareFiles(file1, file2 string) (bool, error) {
 	}
 }
 
+// getETag returns the ETag to send with If-None-Match, only if the destination file exists.
+func (d *Downloader) getETag(destModTime time.Time) (string, error) {
+	etag := ""
+	// the destination could have been deleted leaving an .etag
+	if d.etagFn != nil && (destModTime != time.Time{}) {
+		var err error
+
+		etag, err = (*d.etagFn)(d.destPath)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return etag, nil
+}
+
 // Download downloads the file from the URL to the destination path.
 // Returns true if the file was downloaded, false if it was already up to date.
 func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
@@ -467,15 +499,9 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 
 	destModTime, destFileMode := d.getDestInfo()
 
-	etag := ""
-	// only add If-None-Match if destPath exists, it could have been deleted leaving an .etag
-	if d.etagFn != nil && (destModTime != time.Time{}) {
-		var err error
-
-		etag, err = (*d.etagFn)(d.destPath)
-		if err != nil {
-			d.logger.Warnf("Failed to get etag: %s", err)
-		}
+	etag, err := d.getETag(destModTime)
+	if err != nil {
+		d.logger.Warnf("Failed to get etag: %s", err)
 	}
 
 	uptodate, err := d.isLocalFresh(ctx, url, destModTime, etag)
@@ -504,9 +530,17 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 		d.logger.Trace("If-None-Match: ", etag)
 	}
 
+	if d.beforeRequest != nil {
+		d.beforeRequest(req)
+	}
+
 	resp, err := d.httpClient.Do(req)
 	if err != nil {
 		return false, fmt.Errorf("failed http request for %s: %w", url, err)
+	}
+
+	if d.afterRequest != nil {
+		d.afterRequest(resp)
 	}
 
 	defer resp.Body.Close()
