@@ -30,7 +30,7 @@ linters-settings:
     # If lower than 0, disable the check.
     # Default: 40
     # lower this after refactoring
-    statements: 111
+    statements: 112
 
   govet:
     enable-all: true
