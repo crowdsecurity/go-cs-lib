@@ -32,7 +32,7 @@ func (e NotFoundError) Error() string {
 	return "document not found at " + e.URL
 }
 
-// BadHTTPCodeError returned when the server responds with unexpected HTTP code.
+// BadHTTPCodeError is returned when the server responds with unexpected HTTP code.
 type BadHTTPCodeError struct {
 	URL  string
 	Code int
@@ -40,6 +40,16 @@ type BadHTTPCodeError struct {
 
 func (e BadHTTPCodeError) Error() string {
 	return fmt.Sprintf("bad HTTP code %d for %s", e.Code, e.URL)
+}
+
+// HashMismatchError is returned when the downloaded file does not match the expected hash.
+type HashMismatchError struct {
+	Expected string
+	Got      string
+}
+
+func (e HashMismatchError) Error() string {
+	return fmt.Sprintf("hash mismatch: expected %s, got %s", e.Expected, e.Got)
 }
 
 func nullLogger() *logrus.Entry {
@@ -635,7 +645,7 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 	if hasher != nil {
 		got := hex.EncodeToString(hasher.Sum(nil))
 		if got != d.verifyHashValue {
-			return false, fmt.Errorf("hash mismatch: expected %s, got %s", d.verifyHashValue, got)
+			return false, HashMismatchError{Expected: d.verifyHashValue, Got: got}
 		}
 	}
 
