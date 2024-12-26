@@ -1,6 +1,6 @@
 module github.com/crowdsecurity/go-cs-lib
 
-go 1.23.4
+go 1.23
 
 require (
 	github.com/blackfireio/osinfo v1.0.5
