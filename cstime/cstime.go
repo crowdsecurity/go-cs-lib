@@ -17,13 +17,13 @@ func ParseDuration(s string) (time.Duration, error) {
 		if len(parts) != 2 {
 			return 0, fmt.Errorf("invalid duration format '%s'", s)
 		}
-		
+
 		days, err := strconv.Atoi(parts[0])
 		if err != nil {
 			return 0, err
 		}
 
-		daysDuration = time.Hour * time.Duration(24 * days)
+		daysDuration = time.Hour * time.Duration(24*days)
 
 		s = parts[1]
 
@@ -36,8 +36,8 @@ func ParseDuration(s string) (time.Duration, error) {
 	if err != nil {
 		return 0, err
 	}
-		
-	if (daysDuration < 0) {
+
+	if daysDuration < 0 {
 		return daysDuration - d, nil
 	}
 

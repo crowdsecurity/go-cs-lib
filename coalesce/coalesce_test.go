@@ -11,7 +11,10 @@ import (
 )
 
 func TestString(t *testing.T) {
-	tests := []struct{have []string; want string}{
+	tests := []struct {
+		have []string
+		want string
+	}{
 		{[]string{}, ""},
 		{[]string{"", "", ""}, ""},
 		{[]string{"", "", "c"}, "c"},
@@ -27,7 +30,10 @@ func TestString(t *testing.T) {
 }
 
 func TestInt(t *testing.T) {
-	tests := []struct{have []int; want int}{
+	tests := []struct {
+		have []int
+		want int
+	}{
 		{[]int{}, 0},
 		{[]int{0, 0, 0}, 0},
 		{[]int{0, 0, 3}, 3},
@@ -43,7 +49,10 @@ func TestInt(t *testing.T) {
 }
 
 func TestNotNil(t *testing.T) {
-	tests := []struct{have []*int; want *int}{
+	tests := []struct {
+		have []*int
+		want *int
+	}{
 		{[]*int{}, nil},
 		{[]*int{nil, nil, nil}, nil},
 		{[]*int{nil, nil, ptr.Of(3)}, ptr.Of(3)},

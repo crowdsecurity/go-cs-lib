@@ -5,8 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/crowdsecurity/go-cs-lib/yamlpatch"
 	"github.com/stretchr/testify/require"
+
+	"github.com/crowdsecurity/go-cs-lib/yamlpatch"
 )
 
 // similar to the one in cstest, but with test number too. We cannot import

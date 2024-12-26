@@ -1,7 +1,7 @@
 package slicetools
 
 // Concat concatenates multiple slices and returns the result.
-func Concat[T any](slices...[]T) []T {
+func Concat[T any](slices ...[]T) []T {
 	tot := 0
 	for _, s := range slices {
 		tot += len(s)

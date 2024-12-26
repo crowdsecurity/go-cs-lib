@@ -29,6 +29,7 @@ func SortedKeysNoCase[V any](m map[string]V) []string {
 			// will have uppercase first
 			return keys[i] < keys[j]
 		}
+
 		return li < lj
 	})
 
