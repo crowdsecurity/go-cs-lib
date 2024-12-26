@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestBackwardInts(t *testing.T) {
 	ints := []int{10, 20, 30, 40, 50}
 	expected := []int{50, 40, 30, 20, 10}

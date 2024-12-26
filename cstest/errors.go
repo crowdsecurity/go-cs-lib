@@ -4,10 +4,9 @@ import (
 	"strings"
 	"testing"
 
+	logtest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	logtest "github.com/sirupsen/logrus/hooks/test"
 )
 
 // The following functions are used to test for errors and log messages.

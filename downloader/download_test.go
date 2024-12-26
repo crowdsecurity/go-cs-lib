@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/crowdsecurity/go-cs-lib/downloader"
-
 	"github.com/stretchr/testify/require"
+
+	"github.com/crowdsecurity/go-cs-lib/downloader"
 )
 
 // simplest case: just download a file every time
