@@ -171,5 +171,5 @@ func (tk *traceKeeper) catchPanic(component string) {
 	}
 
 	log.Errorf("stacktrace/report is written to %s: please join it to your issue", filename)
-	log.Fatal("crowdsec stopped")
+	log.Fatal("crowdsec stopped") //nolint:revive // intentional deep-exit
 }

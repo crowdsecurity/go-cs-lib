@@ -5,7 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"crypto"
-	_ "crypto/md5"
+	_ "crypto/md5"    // available hash types
 	_ "crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -73,12 +73,12 @@ func SHA256(path string) (string, error) {
 
 	defer file.Close()
 
-	hash := crypto.SHA256.New()
-	if _, err := io.Copy(hash, file); err != nil {
+	h := crypto.SHA256.New()
+	if _, err := io.Copy(h, file); err != nil {
 		return "", err
 	}
 
-	return hex.EncodeToString(hash.Sum(nil)), nil
+	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 // Downloader fetches a file from a URL to a destination path, with various options.

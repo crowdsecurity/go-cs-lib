@@ -1,219 +1,206 @@
-# https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml
-
-linters-settings:
-  cyclop:
-    # lower this after refactoring
-    max-complexity: 48
-
-  gci:
-    sections:
-     - standard
-     - default
-     - prefix(github.com/crowdsecurity)
-     - prefix(github.com/crowdsecurity/go-cs-lib)
-
-  gocognit:
-    # lower this after refactoring
-    min-complexity: 54
-
-  gocyclo:
-    # lower this after refactoring
-    min-complexity: 45
-
-  funlen:
-    # Checks the number of lines in a function.
-    # If lower than 0, disable the check.
-    # Default: 60
-    # lower this after refactoring
-    lines: 200
-    # Checks the number of statements in a function.
-    # If lower than 0, disable the check.
-    # Default: 40
-    # lower this after refactoring
-    statements: 112
-
-  govet:
-    enable-all: true
-    disable:
-     - reflectvaluecompare
-     - fieldalignment
-
-  lll:
-    # lower this after refactoring
-    line-length: 140
-
-  maintidx:
-    # raise this after refactoring
-    under: 11
-
-  misspell:
-    locale: US
-
-  nestif:
-    # lower this after refactoring
-    min-complexity: 28
-
-  nlreturn:
-    block-size: 5
-
-  nolintlint:
-    allow-unused: false # report any unused nolint directives
-    require-explanation: false # don't require an explanation for nolint directives
-    require-specific: false # don't require nolint directives to be specific about which linter is being skipped
-
-  depguard:
-    rules:
-      yaml:
-        files:
-          - "!**/yamlpatch/patcher.go"
-        deny:
-          - pkg: "gopkg.in/yaml.v2"
-            desc: "yaml.v2 is deprecated for new code in favor of yaml.v3"
-
-  revive:
-    ignore-generated-header: true
-    severity: error
-    enable-all-rules: true
-    rules:
-      - name: add-constant
-        disabled: true
-      - name: blank-imports
-        disabled: true
-      - name: cognitive-complexity
-        disabled: true
-      - name: confusing-results
-        disabled: true
-      - name: cyclomatic
-        disabled: true
-      - name: deep-exit
-        disabled: true
-      - name: defer
-        disabled: true
-      - name: flag-parameter
-        disabled: true
-      - name: function-length
-        disabled: true
-      - name: import-shadowing
-        disabled: true
-      - name: line-length-limit
-        disabled: true
-      - name: time-equal
-        disabled: true
-      - name: unhandled-error
-        disabled: true
-        arguments:
-          - "fmt.Print"
-          - "fmt.Printf"
-          - "fmt.Println"
-      - name: unnecessary-stmt
-        disabled: true
-      - name: unused-receiver
-        disabled: true
-      - name: use-any
-        disabled: true
-      - name: useless-break
-        disabled: true
-
-  wsl:
-    # Allow blocks to end with comments
-    allow-trailing-comment: true
+version: "2"
 
 linters:
-  enable-all: true
+  default: all
   disable:
-    #
-    # DEPRECATED by golangi-lint
-    #
-    - exportloopref
-
-    #
-    # Recommended? (easy)
-    #
-
-    - gci                   # Gci control golang package import order and make it always deterministic.
-    - godot                 # Check if comments end in a period
-    - gofmt                 # Gofmt checks whether code was gofmt-ed. By default this tool runs with -s option to check for code simplification
-    - goimports             # Check import statements are formatted according to the 'goimport' command. Reformat imports in autofix mode.
-    - gosec                 # (gas): Inspects source code for security problems
-    - wrapcheck             # Checks that errors returned from external packages are wrapped
-
-    #
-    # Recommended? (requires some work)
-    #
-
-    - ireturn               # Accept Interfaces, Return Concrete Types
+    - testableexamples
+    - ireturn
+    - nilnil
+    - perfsprint
+    - thelper
+    - maintidx
+    - errorlint
+    - forbidigo
+    - unparam
+    - usetesting
+    - testifylint
     - mnd                   # An analyzer to detect magic numbers.
-    - nilnil                # Checks that there is no simultaneous return of `nil` error and an invalid value.
-    - unparam               # Reports unused function parameters
+    - godot                 # Check if comments end in a period
+    - gosec                 # (gas): Inspects source code for security problems
+    - inamedparam           # reports interfaces with unnamed method parameters
+    - wrapcheck             # Checks that errors returned from external packages are wrapped
+    - godox                 # Tool for detection of FIXME, TODO and other comment keywords
+    - err113                # Go linter to check the errors handling expressions
+    - paralleltest          # Detects missing usage of t.Parallel() method in your Go test
+    - testpackage           # linter that makes you use a separate _test package
+    - exhaustruct           # Checks if all structure fields are initialized
+    - gochecknoglobals      # Check that no global variables exist.
+    - goconst               # Finds repeated strings that could be replaced by a constant
+    - tagliatelle           # Checks the struct tags.
+    - varnamelen            # checks that the length of a variable's name matches its scope
+    - prealloc
+
+    #
+    # Redundant
+    #
+    - cyclop    # revive
+    - funlen    # revive
+    - gocognit  # revive
+    - gocyclo   # revive
+    - lll       # revive
 
     #
     # Formatting only, useful in IDE but should not be forced on CI?
     #
 
-    - gofumpt               # Gofumpt checks whether code was gofumpt-ed.
     - nlreturn              # nlreturn checks for a new line before return and branch statements to increase code clarity
+    - whitespace            # Whitespace is a linter that checks for unnecessary newlines at the start and end of functions, if, for, etc.
     - wsl                   # add or remove empty lines
 
-    #
-    # Well intended, but not ready for this
-    #
-    - err113                # Go linter to check the errors handling expressions
-    - paralleltest          # Detects missing usage of t.Parallel() method in your Go test
-    - testpackage           # linter that makes you use a separate _test package
+  settings:
 
-    #
-    # Too strict / too many false positives (for now?)
-    #
-    - exhaustruct           # Checks if all structure fields are initialized
-    - gochecknoglobals      # Check that no global variables exist.
-    - goconst               # Finds repeated strings that could be replaced by a constant
-    - varnamelen            # checks that the length of a variable's name matches its scope
+    depguard:
+      rules:
+        yaml:
+          files:
+            - 'yamlpatch/patcher.go'
+          deny:
+            - pkg: gopkg.in/yaml.v2
+              desc: yaml.v2 is deprecated for new code in favor of yaml.v3
 
-    #
-    # Under evaluation
-    #
+    errcheck:
+      # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
+      # Such cases aren't reported by default.
+      check-type-assertions: false
+      # List of functions to exclude from checking, where each entry is a single function to exclude.
+      # See https://github.com/kisielk/errcheck#excluding-functions for details.
 
-    - prealloc              # Finds slice declarations that could potentially be preallocated
+    gocritic:
+      enable-all: true
+      disabled-checks:
+        - paramTypeCombine
+        - deferInLoop             #
+        - sloppyReassign
+        - commentedOutCode
+        - unnamedResult
+        - whyNoLint
+        - httpNoBody
 
+    govet:
+      disable:
+        - fieldalignment
+      enable-all: true
+
+    misspell:
+      locale: US
+
+    nlreturn:
+      block-size: 5
+
+    nolintlint:
+      require-explanation: false  # don't require an explanation for nolint directives
+      require-specific: false     # don't require nolint directives to be specific about which linter is being skipped
+      allow-unused: false         # report any unused nolint directives
+
+    revive:
+      severity: error
+      enable-all-rules: true
+      rules:
+        - name: add-constant
+          disabled: true
+        - name: cognitive-complexity
+          arguments:
+            # lower this after refactoring
+            - 46
+        - name: comment-spacings
+          disabled: true
+        - name: confusing-results
+          disabled: true
+        - name: cyclomatic
+          arguments:
+            # lower this after refactoring
+            - 43
+        - name: defer
+          disabled: true
+        - name: empty-block
+          disabled: true
+        - name: empty-lines
+          disabled: true
+        - name: error-naming
+          disabled: true
+        - name: flag-parameter
+          disabled: true
+        - name: function-length
+          arguments:
+            # lower this after refactoring
+            - 104
+            - 196
+        - name: increment-decrement
+          disabled: true
+        - name: import-alias-naming
+          disabled: true
+        - name: line-length-limit
+          arguments:
+            # lower this after refactoring
+            - 190
+        - name: package-comments
+          disabled: true
+        - name: var-naming
+          disabled: true
+        - name: unnecessary-stmt
+          disabled: true
+        - name: unused-receiver
+          disabled: true
+        - name: use-any
+          disabled: true
+        - name: useless-break
+          disabled: true
+
+    staticcheck:
+      checks:
+        - all
+
+    wsl:
+      # Allow blocks to end with comments
+      allow-trailing-comment: true
+
+  exclusions:
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+
+      # `err` is often shadowed, we may continue to do it
+      - linters:
+          - govet
+        text: 'shadow: declaration of "(err|ctx)" shadows declaration'
+
+      # tolerate long functions in tests
+      - linters:
+          - revive
+        path: (.+)/(.+)_test.go
+        text: 'function-length: .*'
+
+      # tolerate long lines in tests
+      - linters:
+          - revive
+        path: (.+)/(.+)_test.go
+        text: 'line-length-limit: .*'
+
+    paths:
+      - yamlpatch/merge.go
+      - yamlpatch/merge_test.go
+      - third_party$
+      - builtin$
+      - examples$
 
 issues:
-  # “Look, that’s why there’s rules, understand? So that you think before you
-  # break ‘em.” ― Terry Pratchett
-
-  exclude-dirs: []
-
-  exclude-files:
-    - yamlpatch/merge.go
-    - yamlpatch/merge_test.go
-
-  exclude-generated: strict
-
   max-issues-per-linter: 0
   max-same-issues: 0
-  exclude-rules:
 
-    # Won't fix:
+formatters:
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/crowdsecurity)
+        - prefix(github.com/crowdsecurity/go-cs-lib)
 
-    # `err` is often shadowed, we may continue to do it
-    - linters:
-        - govet
-      text: "shadow: declaration of \"err\" shadows declaration"
-
-    - linters:
-        - dupword
-      path: coalesce/coalesce_test.go
-      text: "Duplicate words .* found"
-
-    # Will fix, trivial - just beware of merge conflicts
-
-    - linters:
-        - perfsprint
-      text: "fmt.Sprintf can be replaced .*"
-
-    #
-    # Will fix, easy but some neurons required
-    #
-
-    - linters:
-        - errorlint
-      text: "non-wrapping format verb for fmt.Errorf. Use `%w` to format errors"
+  exclusions:
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
