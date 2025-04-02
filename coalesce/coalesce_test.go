@@ -101,4 +101,4 @@ func TestNotEmptyOrNil(t *testing.T) {
 		})
 	}
 }
-*/
+*/ //nolint: dupword
