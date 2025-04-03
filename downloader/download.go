@@ -5,7 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"crypto"
-	_ "crypto/md5"    // available hash types
+	_ "crypto/md5" //nolint:gosec // available hash types
 	_ "crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -138,7 +138,7 @@ func (d *Downloader) WithMakeDirs(makeDirs bool) *Downloader {
 // If an ETag is set, a server will not initiate a download
 // if the remote file matches the ETag.
 func (d *Downloader) WithETag(etag string) *Downloader {
-	callback := func(_ string) (string, error) {
+	callback := func(_ string) (string, error) { //nolint:unparam
 		return etag, nil
 	}
 
@@ -243,7 +243,7 @@ func (d *Downloader) isLocalFresh(ctx context.Context, url string, modTime time.
 		localIsOld = modTime.Add(d.shelfLife).Before(time.Now())
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, http.NoBody)
 	if err != nil {
 		return false, fmt.Errorf("failed to create HEAD request for %s: %w", url, err)
 	}
@@ -523,7 +523,7 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 		return false, nil
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
 	if err != nil {
 		return false, fmt.Errorf("failed to create http request for %s: %w", url, err)
 	}

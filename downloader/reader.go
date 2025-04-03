@@ -33,7 +33,7 @@ func (l *limitedReader) Read(p []byte) (int, error) {
 	return n, err
 }
 
-func (l *limitedReader) Close() error {
+func (*limitedReader) Close() error {
 	// closing the underlying reader is left to the caller
 	return nil
 }

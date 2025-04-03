@@ -37,7 +37,7 @@ func readYAML(filePath string) ([]byte, error) {
 		return nil, fmt.Errorf("while reading yaml file: %w", err)
 	}
 
-	var yamlMap map[interface{}]interface{}
+	var yamlMap map[any]any
 
 	if err = yaml.Unmarshal(content, &yamlMap); err != nil {
 		return nil, fmt.Errorf("%s: %w", filePath, err)
@@ -89,7 +89,7 @@ func decodeDocuments(file *os.File, buf *bytes.Buffer, finalDashes bool) error {
 	dashTerminator := false
 
 	for {
-		yml := make(map[interface{}]interface{})
+		yml := make(map[any]any)
 
 		err := dec.Decode(&yml)
 		if err != nil {
@@ -128,7 +128,7 @@ func (p *Patcher) PrependedPatchContent() ([]byte, error) {
 	patchFile, err := os.Open(p.PatchFilePath)
 	// optional file, ignore if it does not exist
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		return nil, fmt.Errorf("while opening %s: %s", p.PatchFilePath, err)
+		return nil, fmt.Errorf("while opening %s: %w", p.PatchFilePath, err)
 	}
 
 	var result bytes.Buffer
