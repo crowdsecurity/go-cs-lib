@@ -7,7 +7,7 @@ import (
 
 // Interpolate fills a string template with the given values, can be map or struct.
 // example: Interpolate("{{.Name}}", map[string]string{"Name": "JohnDoe"})
-func Interpolate(s string, data interface{}) (string, error) {
+func Interpolate(s string, data any) (string, error) {
 	tmpl, err := template.New("").Option("missingkey=error").Parse(s)
 	if err != nil {
 		return "", err

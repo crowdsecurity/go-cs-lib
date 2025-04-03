@@ -45,10 +45,11 @@ func TestBackwardEarlyTermination(t *testing.T) {
 	ints := []int{10, 20, 30, 40, 50}
 	expected := []int{50, 40, 30} // Stop after reaching 30
 
-	var result []int
+	result := []int{}
 
 	for _, value := range Backward(ints) {
 		result = append(result, value)
+
 		if value == 30 {
 			break
 		}

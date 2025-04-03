@@ -17,7 +17,7 @@ func TestInterpolate(t *testing.T) {
 	tests := []struct {
 		name        string
 		template    string
-		data        interface{}
+		data        any
 		expected    string
 		expectedErr string
 	}{

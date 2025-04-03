@@ -7,16 +7,10 @@ linters:
     - ireturn
     - nilnil
     - perfsprint
-    - thelper
-    - maintidx
-    - errorlint
     - forbidigo
-    - unparam
     - usetesting
-    - testifylint
     - mnd                   # An analyzer to detect magic numbers.
     - godot                 # Check if comments end in a period
-    - gosec                 # (gas): Inspects source code for security problems
     - inamedparam           # reports interfaces with unnamed method parameters
     - wrapcheck             # Checks that errors returned from external packages are wrapped
     - godox                 # Tool for detection of FIXME, TODO and other comment keywords
@@ -28,7 +22,6 @@ linters:
     - goconst               # Finds repeated strings that could be replaced by a constant
     - tagliatelle           # Checks the struct tags.
     - varnamelen            # checks that the length of a variable's name matches its scope
-    - prealloc
 
     #
     # Redundant
@@ -44,7 +37,6 @@ linters:
     #
 
     - nlreturn              # nlreturn checks for a new line before return and branch statements to increase code clarity
-    - whitespace            # Whitespace is a linter that checks for unnecessary newlines at the start and end of functions, if, for, etc.
     - wsl                   # add or remove empty lines
 
   settings:
@@ -69,17 +61,19 @@ linters:
       enable-all: true
       disabled-checks:
         - paramTypeCombine
-        - deferInLoop             #
         - sloppyReassign
         - commentedOutCode
         - unnamedResult
         - whyNoLint
-        - httpNoBody
 
     govet:
       disable:
         - fieldalignment
       enable-all: true
+
+    maintidx:
+      # raise this after refactoring
+      under: 18
 
     misspell:
       locale: US
@@ -112,12 +106,6 @@ linters:
             - 43
         - name: defer
           disabled: true
-        - name: empty-block
-          disabled: true
-        - name: empty-lines
-          disabled: true
-        - name: error-naming
-          disabled: true
         - name: flag-parameter
           disabled: true
         - name: function-length
@@ -125,23 +113,11 @@ linters:
             # lower this after refactoring
             - 104
             - 196
-        - name: increment-decrement
-          disabled: true
-        - name: import-alias-naming
-          disabled: true
         - name: line-length-limit
           arguments:
             # lower this after refactoring
             - 190
-        - name: package-comments
-          disabled: true
-        - name: var-naming
-          disabled: true
         - name: unnecessary-stmt
-          disabled: true
-        - name: unused-receiver
-          disabled: true
-        - name: use-any
           disabled: true
         - name: useless-break
           disabled: true
