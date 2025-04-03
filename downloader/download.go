@@ -5,7 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"crypto"
-	_ "crypto/md5"    // available hash types
+	_ "crypto/md5" // available hash types
 	_ "crypto/sha256"
 	"encoding/hex"
 	"errors"

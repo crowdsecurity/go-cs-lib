@@ -191,6 +191,10 @@ issues:
   max-same-issues: 0
 
 formatters:
+  enable:
+    - gci
+    - gofumpt
+
   settings:
     gci:
       sections:
@@ -201,6 +205,8 @@ formatters:
 
   exclusions:
     paths:
+      - yamlpatch/merge.go
+      - yamlpatch/merge_test.go
       - third_party$
       - builtin$
       - examples$
