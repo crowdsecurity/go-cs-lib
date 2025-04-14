@@ -3,7 +3,7 @@
 package cstest
 
 const (
-	// these are the same on unix
+	// these are the same on unix.
 	FileNotFoundMessage = "no such file or directory"
 	PathNotFoundMessage = FileNotFoundMessage
 )

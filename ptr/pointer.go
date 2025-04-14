@@ -24,7 +24,7 @@ func Of[T any](t T) *T {
 	return &t
 }
 
-// OrEmpty returns *t if its non-nil, or else an empty T
+// OrEmpty returns *t if its non-nil, or else an empty T.
 func OrEmpty[T any](t *T) T {
 	if t != nil {
 		return *t
@@ -44,13 +44,13 @@ func OrDefault[T any](t *T, def T) T {
 	return def
 }
 
-// Empty returns an empty T type
+// Empty returns an empty T type.
 func Empty[T any]() T {
 	var empty T
 	return empty
 }
 
-// TypeName returns the name of the type
+// TypeName returns the name of the type.
 func TypeName[T any]() string {
 	var empty T
 	return fmt.Sprintf("%T", empty)

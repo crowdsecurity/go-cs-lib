@@ -46,15 +46,15 @@ func TestStrictExpand(t *testing.T) {
 		},
 		{
 			input:    "My home directory is ${HOME}",
-			expected: fmt.Sprintf("My home directory is %s", home),
+			expected: "My home directory is " + home,
 		},
 		{
 			input:    "This is a $SINGLE_VAR string with ${HOME}",
-			expected: fmt.Sprintf("This is a $SINGLE_VAR string with %s", home),
+			expected: "This is a $SINGLE_VAR string with " + home,
 		},
 		{
 			input:    "This is a $SINGLE_VAR string with $HOME",
-			expected: fmt.Sprintf("This is a $SINGLE_VAR string with %s", home),
+			expected: "This is a $SINGLE_VAR string with " + home,
 		},
 		{
 			input:    "This variable does not exist: $NON_EXISTENT_VAR",

@@ -187,14 +187,11 @@ func TestMergedPatchContent(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			dirPath, err := os.MkdirTemp("", "yamlpatch")
-			require.NoError(t, err)
-
-			defer os.RemoveAll(dirPath)
+			dirPath := t.TempDir()
 
 			configPath := filepath.Join(dirPath, "config.yaml")
 			patchPath := filepath.Join(dirPath, "config.yaml.local")
-			err = os.WriteFile(configPath, []byte(tc.base), 0o600)
+			err := os.WriteFile(configPath, []byte(tc.base), 0o600)
 			require.NoError(t, err)
 
 			err = os.WriteFile(patchPath, []byte(tc.patch), 0o600)
@@ -290,15 +287,12 @@ func TestPrependedPatchContent(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			dirPath, err := os.MkdirTemp("", "yamlpatch")
-			require.NoError(t, err)
-
-			defer os.RemoveAll(dirPath)
+			dirPath := t.TempDir()
 
 			configPath := filepath.Join(dirPath, "config.yaml")
 			patchPath := filepath.Join(dirPath, "config.yaml.local")
 
-			err = os.WriteFile(configPath, []byte(tc.base), 0o600)
+			err := os.WriteFile(configPath, []byte(tc.base), 0o600)
 			require.NoError(t, err)
 
 			err = os.WriteFile(patchPath, []byte(tc.patch), 0o600)
