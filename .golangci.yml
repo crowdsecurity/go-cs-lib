@@ -3,17 +3,12 @@ version: "2"
 linters:
   default: all
   disable:
-    - testableexamples
     - ireturn
     - nilnil
-    - perfsprint
     - forbidigo
-    - usetesting
     - mnd                   # An analyzer to detect magic numbers.
-    - godot                 # Check if comments end in a period
     - inamedparam           # reports interfaces with unnamed method parameters
     - wrapcheck             # Checks that errors returned from external packages are wrapped
-    - godox                 # Tool for detection of FIXME, TODO and other comment keywords
     - err113                # Go linter to check the errors handling expressions
     - paralleltest          # Detects missing usage of t.Parallel() method in your Go test
     - testpackage           # linter that makes you use a separate _test package

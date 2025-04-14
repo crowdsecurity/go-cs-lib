@@ -20,7 +20,7 @@ import (
 
 // Init is called after reading the configuration to set a persistent location.
 // (i.e. config_paths.data_dir should be persistent even within containers)
-// If not called, the default is /tmp or equivalent
+// If not called, the default is /tmp or equivalent.
 func Init(dir string) error {
 	err := os.MkdirAll(dir, 0o700)
 	if err != nil {
@@ -32,17 +32,17 @@ func Init(dir string) error {
 	return nil
 }
 
-// CatchPanic should be called from all go-routines to ensure proper stack trace reporting
+// CatchPanic should be called from all go-routines to ensure proper stack trace reporting.
 func CatchPanic(component string) {
 	keeper.catchPanic(component)
 }
 
-// WriteStackTrace writes a stack trace to a file and returns the path
+// WriteStackTrace writes a stack trace to a file and returns the path.
 func WriteStackTrace(iErr any) (string, error) {
 	return keeper.writeStackTrace(iErr)
 }
 
-// List returns a list of all collected files
+// List returns a list of all collected files.
 func List() ([]string, error) {
 	return keeper.list()
 }

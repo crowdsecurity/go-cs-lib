@@ -1,6 +1,6 @@
 package coalesce
 
-// String returns the first non-empty string, or ""
+// String returns the first non-empty string, or "".
 func String(s ...string) string {
 	for _, v := range s {
 		if v != "" {
@@ -11,7 +11,7 @@ func String(s ...string) string {
 	return ""
 }
 
-// Int returns the first non-zero value, or zero
+// Int returns the first non-zero value, or zero.
 func Int(s ...int) int {
 	for _, v := range s {
 		if v != 0 {
@@ -22,7 +22,7 @@ func Int(s ...int) int {
 	return 0
 }
 
-// NotNil returns the first non-nil pointer, or nil
+// NotNil returns the first non-nil pointer, or nil.
 func NotNil[T any](args ...*T) *T {
 	for _, arg := range args {
 		if arg != nil {

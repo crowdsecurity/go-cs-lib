@@ -26,9 +26,8 @@ jobs:
 
     - name: Run unit tests
       run: |
-        go install github.com/kyoh86/richgo@v0.3.12
-        set -o pipefail
-        go test ./... | richgo testfilter
+        go install gotest.tools/gotestsum@v1.12.1
+        gotestsum --format github-actions
       env:
         RICHGO_FORCE_COLOR: 1
 

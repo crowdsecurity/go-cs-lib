@@ -25,7 +25,7 @@ func NewPatcher(filePath string, suffix string) *Patcher {
 	}
 }
 
-// SetQuiet sets the quiet flag, which will log as DEBUG_LEVEL instead of INFO
+// SetQuiet sets the quiet flag, which will log as DEBUG_LEVEL instead of INFO.
 func (p *Patcher) SetQuiet(quiet bool) {
 	p.quiet = quiet
 }
