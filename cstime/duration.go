@@ -5,6 +5,15 @@ import (
 	"time"
 )
 
+// Go's standard library does not support days or weeks as duration units —
+// time.ParseDuration understands only hours and smaller (e.g., "72h", "1h30m").
+//
+// In this package, we define a "day" as exactly 24 hours (24h), and
+// optionally support combinations like "2d3h". This simplification assumes
+// that days are uniform and does not account for daylight saving time (DST),
+// leap seconds, or calendar semantics. This is intentional: we're modeling
+// durations, not calendar dates.
+
 // Duration wraps time.Duration and supports parsing with "d" for days.
 type Duration time.Duration
 
