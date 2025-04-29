@@ -32,7 +32,7 @@ func ParseDuration(input string) (time.Duration, error) {
 
 		// 'd' must be at the start, so rest must not contain another 'd'
 		if strings.Contains(rest, "d") {
-			return 0, fmt.Errorf("invalid duration %q: 'd' must appear only at the beginning", input)
+			return 0, fmt.Errorf("invalid duration %q: 'd' can appear only as the first unit", input)
 		}
 
 		// Day part must be a valid integer
