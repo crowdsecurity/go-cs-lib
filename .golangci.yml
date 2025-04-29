@@ -6,6 +6,7 @@ linters:
     - ireturn
     - nilnil
     - forbidigo
+    - funcorder
     - mnd                   # An analyzer to detect magic numbers.
     - inamedparam           # reports interfaces with unnamed method parameters
     - wrapcheck             # Checks that errors returned from external packages are wrapped
@@ -149,6 +150,11 @@ linters:
           - revive
         path: (.+)/(.+)_test.go
         text: 'line-length-limit: .*'
+
+      - linters:
+          - recvcheck
+        path: cstime/duration.go
+        text: the methods of "Duration" use pointer receiver and non-pointer receiver.
 
     paths:
       - yamlpatch/merge.go
