@@ -70,7 +70,7 @@ func TestParseDuration(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := ParseDuration(tc.input)
+			got, err := ParseDurationWithDays(tc.input)
 			cstest.RequireErrorContains(t, err, tc.wantErr)
 			assert.Equal(t, tc.want, got)
 		})

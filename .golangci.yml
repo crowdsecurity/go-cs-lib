@@ -154,7 +154,7 @@ linters:
       - linters:
           - recvcheck
         path: cstime/duration.go
-        text: the methods of "Duration" use pointer receiver and non-pointer receiver.
+        text: the methods of "DurationWithDays" use pointer receiver and non-pointer receiver.
 
     paths:
       - yamlpatch/merge.go

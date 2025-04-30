@@ -10,7 +10,7 @@ import (
 
 // ParseDuration parses a string representing a duration, and supports
 // days as a unit (e.g., "2d", "2d3h", "24h", "2h45m").
-func ParseDuration(input string) (time.Duration, error) {
+func ParseDurationWithDays(input string) (time.Duration, error) {
 	var total time.Duration
 
 	s := strings.TrimSpace(input)
