@@ -1,6 +1,7 @@
 package cstime
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -9,37 +10,57 @@ import (
 
 // ParseDuration parses a string representing a duration, and supports
 // days as a unit (e.g., "2d", "2d3h", "24h", "2h45m").
-func ParseDuration(s string) (time.Duration, error) {
-	daysDuration := time.Duration(0)
+func ParseDurationWithDays(input string) (time.Duration, error) {
+	var total time.Duration
 
-	if strings.Contains(s, "d") {
-		parts := strings.Split(s, "d")
-		if len(parts) != 2 {
-			return 0, fmt.Errorf("invalid duration format '%s'", s)
+	s := strings.TrimSpace(input)
+
+	if s == "" {
+		return 0, errors.New("empty duration string")
+	}
+
+	negative := false
+	if strings.HasPrefix(s, "-") {
+		negative = true
+		s = s[1:]
+	}
+
+	// Check if 'd' is present and only at the start
+	if i := strings.IndexByte(s, 'd'); i != -1 {
+		dayPart := s[:i]
+		rest := s[i+1:]
+
+		// 'd' must be at the start, so rest must not contain another 'd'
+		if strings.Contains(rest, "d") {
+			return 0, fmt.Errorf("invalid duration %q: 'd' can appear only as the first unit", input)
 		}
 
-		days, err := strconv.Atoi(parts[0])
+		// Day part must be a valid integer
+		dayVal, err := strconv.Atoi(dayPart)
+		if err != nil {
+			return 0, fmt.Errorf("invalid day value in duration %q", input)
+		}
+
+		total += time.Duration(dayVal) * 24 * time.Hour
+		s = rest
+	}
+
+	if strings.Contains(s, "-") {
+		return 0, fmt.Errorf("misplaced negative sign in duration %q", input)
+	}
+
+	if s != "" {
+		// Delegate remaining part to time.ParseDuration
+		dur, err := time.ParseDuration(s)
 		if err != nil {
 			return 0, err
 		}
-
-		daysDuration = time.Hour * time.Duration(24*days)
-
-		s = parts[1]
-
-		if s == "" {
-			return daysDuration, nil
-		}
+		total += dur
 	}
 
-	d, err := time.ParseDuration(s)
-	if err != nil {
-		return 0, err
+	if negative {
+		total = -total
 	}
 
-	if daysDuration < 0 {
-		return daysDuration - d, nil
-	}
-
-	return daysDuration + d, nil
+	return total, nil
 }
