@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/crowdsecurity/go-cs-lib/csyaml"
 	"github.com/crowdsecurity/go-cs-lib/cstest"
+	"github.com/crowdsecurity/go-cs-lib/csyaml"
 )
 
 func TestMergedPatchContent(t *testing.T) {
