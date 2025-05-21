@@ -8,21 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/crowdsecurity/go-cs-lib/csyaml"
+	"github.com/crowdsecurity/go-cs-lib/cstest"
 )
-
-// similar to the one in cstest, but with test number too. We cannot import
-// cstest here because of circular dependency.
-func requireErrorContains(t *testing.T, err error, expectedErr string) {
-	t.Helper()
-
-	if expectedErr != "" {
-		require.ErrorContains(t, err, expectedErr)
-
-		return
-	}
-
-	require.NoError(t, err)
-}
 
 func TestMergedPatchContent(t *testing.T) {
 	t.Parallel()
@@ -199,7 +186,7 @@ func TestMergedPatchContent(t *testing.T) {
 
 			patcher := csyaml.NewPatcher(configPath, ".local")
 			patchedBytes, err := patcher.MergedPatchContent()
-			requireErrorContains(t, err, tc.expectedErr)
+			cstest.RequireErrorContains(t, err, tc.expectedErr)
 			require.YAMLEq(t, tc.expected, string(patchedBytes))
 		})
 	}
@@ -300,7 +287,7 @@ func TestPrependedPatchContent(t *testing.T) {
 
 			patcher := csyaml.NewPatcher(configPath, ".local")
 			patchedBytes, err := patcher.PrependedPatchContent()
-			requireErrorContains(t, err, tc.expectedErr)
+			cstest.RequireErrorContains(t, err, tc.expectedErr)
 			// YAMLeq does not handle multiple documents
 			require.Equal(t, tc.expected, string(patchedBytes))
 		})

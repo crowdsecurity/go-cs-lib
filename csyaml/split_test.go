@@ -10,23 +10,27 @@ import (
 	"github.com/crowdsecurity/go-cs-lib/csyaml"
 )
 
-func TestCollectTopLevelKeys(t *testing.T) {
+func TestSplitDocuments(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   string
-		want    [][]string
+		want    [][]byte
 		wantErr string
 	}{
 		{
 			name:  "single mapping",
 			input: "a: 1\nb: 2\n",
-			want:  [][]string{{"a", "b"}},
+			want:  [][]byte{[]byte("a: 1\nb: 2\n")},
 		},
 		{
-			name:    "duplicate keys mapping",
-			input:   "a: 1\nb: 2\na: 3\n",
-			want:    nil,
-			wantErr: `position 0: [3:1] mapping key "a" already defined at [1:1]`,
+			name:  "sequence doc",
+			input: "- 1\n- 2\n",
+			want:  [][]byte{[]byte("- 1\n- 2\n")},
+		},
+		{
+			name:  "scalar doc",
+			input: "\"scalar\"\n",
+			want:  [][]byte{[]byte("scalar\n")},
 		},
 		{
 			name: "multiple documents",
@@ -35,33 +39,35 @@ a: 1
 b: 2
 ---
 - 1
----
-c: 1
-b: 2
+- 2
 ---
 "scalar"
 `,
-			want: [][]string{{"a", "b"}, {}, {"c", "b"}, {}},
+			want: [][]byte{
+				[]byte("a: 1\nb: 2\n"),
+				[]byte("- 1\n- 2\n"),
+				[]byte("scalar\n"),
+			},
 		},
 		{
 			name:  "empty input",
 			input: "",
-			want:  [][]string{},
+			want:  [][]byte{},
 		},
 		{
 			name:    "invalid YAML",
-			input:   "list: [1, 2,",
+			input:   "list: [1, 2",
 			want:    nil,
-			wantErr: "position 0: [1:7] sequence end token ']' not found",
+			wantErr: "decoding document 0: [1:7] sequence end token ']' not found",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := strings.NewReader(tc.input)
-			got, err := csyaml.GetDocumentKeys(r)
+			docs, err := csyaml.SplitDocuments(r)
 			cstest.RequireErrorContains(t, err, tc.wantErr)
-			assert.Equal(t, tc.want, got)
+			assert.Equal(t, tc.want, docs)
 		})
 	}
 }
