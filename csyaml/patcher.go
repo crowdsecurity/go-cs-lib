@@ -1,4 +1,4 @@
-package yamlpatch
+package csyaml
 
 import (
 	"bytes"
@@ -9,6 +9,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
+
+	"github.com/crowdsecurity/go-cs-lib/csyaml/internal/merge"
 )
 
 type Patcher struct {
@@ -72,7 +74,7 @@ func (p *Patcher) MergedPatchContent() ([]byte, error) {
 
 	// strict mode true, will raise errors for duplicate map keys and
 	// overriding with a different type
-	patched, err := YAML([][]byte{base, over}, true)
+	patched, err := merge.YAML([][]byte{base, over}, true)
 	if err != nil {
 		return nil, err
 	}

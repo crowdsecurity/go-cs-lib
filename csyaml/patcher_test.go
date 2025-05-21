@@ -1,4 +1,4 @@
-package yamlpatch_test
+package csyaml_test
 
 import (
 	"os"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/crowdsecurity/go-cs-lib/yamlpatch"
+	"github.com/crowdsecurity/go-cs-lib/csyaml"
 )
 
 // similar to the one in cstest, but with test number too. We cannot import
@@ -197,7 +197,7 @@ func TestMergedPatchContent(t *testing.T) {
 			err = os.WriteFile(patchPath, []byte(tc.patch), 0o600)
 			require.NoError(t, err)
 
-			patcher := yamlpatch.NewPatcher(configPath, ".local")
+			patcher := csyaml.NewPatcher(configPath, ".local")
 			patchedBytes, err := patcher.MergedPatchContent()
 			requireErrorContains(t, err, tc.expectedErr)
 			require.YAMLEq(t, tc.expected, string(patchedBytes))
@@ -298,7 +298,7 @@ func TestPrependedPatchContent(t *testing.T) {
 			err = os.WriteFile(patchPath, []byte(tc.patch), 0o600)
 			require.NoError(t, err)
 
-			patcher := yamlpatch.NewPatcher(configPath, ".local")
+			patcher := csyaml.NewPatcher(configPath, ".local")
 			patchedBytes, err := patcher.PrependedPatchContent()
 			requireErrorContains(t, err, tc.expectedErr)
 			// YAMLeq does not handle multiple documents
