@@ -5,6 +5,7 @@ go 1.23
 require (
 	github.com/blackfireio/osinfo v1.0.5
 	github.com/coreos/go-systemd/v22 v22.5.0
+	github.com/goccy/go-yaml v1.17.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
