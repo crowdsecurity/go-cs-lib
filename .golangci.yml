@@ -41,7 +41,7 @@ linters:
       rules:
         yaml:
           files:
-            - '!**/csyaml/patcher.go'
+            - '!**/yamlpatch/patcher.go'
           deny:
             - pkg: gopkg.in/yaml.v2
               desc: yaml.v2 is deprecated for new code in favor of yaml.v3
@@ -157,8 +157,8 @@ linters:
         text: the methods of "DurationWithDays" use pointer receiver and non-pointer receiver.
 
     paths:
-      - csyaml/internal/merge/merge.go
-      - csyaml/internal/merge/merge_test.go
+      - yamlpatch/merge.go
+      - yamlpatch/merge_test.go
       - third_party$
       - builtin$
       - examples$
@@ -182,8 +182,8 @@ formatters:
 
   exclusions:
     paths:
-      - csyaml/internal/merge/merge.go
-      - csyaml/internal/merge/merge_test.go
+      - yamlpatch/merge.go
+      - yamlpatch/merge_test.go
       - third_party$
       - builtin$
       - examples$

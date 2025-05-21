@@ -77,12 +77,14 @@ func mergeValue(into, from any) (any, error) {
 	}
 
 	// Mappings: deep-merge
-	if isMapping(into) && isMapping(from) {
-		return mergeMap(into.(yaml.MapSlice), from.(yaml.MapSlice))
+	if mi, ok := into.(yaml.MapSlice); ok {
+		if mf, ok2 := from.(yaml.MapSlice); ok2 {
+			return mergeMap(mi, mf)
+		}
 	}
 
 	// Type mismatch: strict
-	return nil, fmt.Errorf("cannot merge %s into %s", describe(from), describe(into))
+	return nil, fmt.Errorf("can't merge a %s into a %s", describe(from), describe(into))
 }
 
 // mergeMap deep-merges two ordered maps (MapSlice) in strict mode.

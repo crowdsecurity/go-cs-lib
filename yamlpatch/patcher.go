@@ -17,7 +17,7 @@ type Patcher struct {
 	quiet         bool
 }
 
-// Deprecated: use csyaml.NewPatcher instead
+// Deprecated: use csyaml.NewPatcher instead.
 func NewPatcher(filePath string, suffix string) *Patcher {
 	return &Patcher{
 		BaseFilePath:  filePath,

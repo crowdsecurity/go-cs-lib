@@ -26,28 +26,28 @@ func TestMergedPatchContent(t *testing.T) {
 			"notayaml",
 			"",
 			"",
-			"config.yaml: yaml: unmarshal errors:",
+			"config.yaml: [1:1] string was used where mapping is expected",
 		},
 		{
 			"invalid yaml in base (detailed message)",
 			"notayaml",
 			"",
 			"",
-			"cannot unmarshal !!str `notayaml`",
+			"config.yaml: [1:1] string was used where mapping is expected",
 		},
 		{
 			"invalid yaml in patch",
 			"",
 			"notayaml",
 			"",
-			"config.yaml.local: yaml: unmarshal errors:",
+			"config.yaml.local: [1:1] string was used where mapping is expected",
 		},
 		{
 			"invalid yaml in patch (detailed message)",
 			"",
 			"notayaml",
 			"",
-			"cannot unmarshal !!str `notayaml`",
+			"config.yaml.local: [1:1] string was used where mapping is expected",
 		},
 		{
 			"basic merge",
@@ -61,17 +61,10 @@ func TestMergedPatchContent(t *testing.T) {
 		// so we used something simpler.
 
 		{
-			"bool merge - off if false",
+			"don't convert on/off to boolean",
 			"bool: on",
 			"bool: off",
-			"bool: false",
-			"",
-		},
-		{
-			"bool merge - on is true",
 			"bool: off",
-			"bool: on",
-			"bool: true",
 			"",
 		},
 		{
@@ -245,28 +238,28 @@ func TestPrependedPatchContent(t *testing.T) {
 			"blablabla",
 			"",
 			"",
-			"config.yaml: yaml: unmarshal errors:",
+			"config.yaml: [1:1] string was used where mapping is expected",
 		},
 		{
 			"invalid yaml in base (detailed message)",
 			"blablabla",
 			"",
 			"",
-			"cannot unmarshal !!str `blablabla`",
+			"config.yaml: [1:1] string was used where mapping is expected",
 		},
 		{
 			"invalid yaml in patch",
 			"",
 			"blablabla",
 			"",
-			"config.yaml.local: yaml: unmarshal errors:",
+			"config.yaml.local: [1:1] string was used where mapping is expected",
 		},
 		{
 			"invalid yaml in patch (detailed message)",
 			"",
 			"blablabla",
 			"",
-			"cannot unmarshal !!str `blablabla`",
+			"config.yaml.local: [1:1] string was used where mapping is expected",
 		},
 	}
 
