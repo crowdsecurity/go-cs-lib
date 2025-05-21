@@ -56,7 +56,7 @@ b: 2
 		},
 		{
 			name:    "invalid YAML",
-			input:   "list: [1, 2",
+			input:   "list: [1, 2,",
 			want:    nil,
 			wantErr: "decoding document 0: [1:7] sequence end token ']' not found",
 		},
