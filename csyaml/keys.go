@@ -12,7 +12,7 @@ import (
 // returns a slice of its top-level keys, in order.
 //
 // Non-mapping documents yield an empty slice. Duplicate keys
-// are now allowed and return an error.
+// are not allowed and return an error.
 func GetDocumentKeys(r io.Reader) ([][]string, error) {
 	// Decode into Go types, but force mappings into MapSlice
 	dec := yaml.NewDecoder(r, yaml.UseOrderedMap())
