@@ -1,44 +1,35 @@
 package csyaml
 
 import (
-	"errors"
-	"fmt"
+	"bytes"
 	"io"
-
-	"github.com/goccy/go-yaml"
 )
 
-// SplitDocuments reads every YAML document from r and returns each
-// as a separate []byte.
+// SplitDocuments returns a slice of byte slices, each representing a YAML document.
 //
-// Documents are round-tripped through goccy’s Decoder/Marshal pipeline,
-// comments and exact original formatting may be lost.
+// Since preserving formatting and comments is important but the existing go packages
+// all have some issue, this function attempts two strategies: one that decodes and
+// re-encodes the YAML content, and another that simply splits the input text.
+// If both methods return the same number of documents, we assume the text-based
+// function is sufficient. It retains comments and formatting better.
+// Otherwise, the round-trip version is used. It retains comments but
+// the formatting may be off. The semantics of the document will still be the same
+// but if it contains parsing errors, they may refer to a wrong line or column.
+//
+// This function returns reading errors but any parsing errors are ignored and
+// trigger the text-based splitting method.
 func SplitDocuments(r io.Reader) ([][]byte, error) {
-	docs := make([][]byte, 0)
-
-	dec := yaml.NewDecoder(r)
-
-	idx := -1
-
-	for {
-		var v any
-
-		idx++
-
-		if err := dec.Decode(&v); err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-			return nil, fmt.Errorf("decoding document %d: %s", idx, yaml.FormatError(err, false, false))
-		}
-
-		out, err := yaml.Marshal(v)
-		if err != nil {
-			return nil, err
-		}
-
-		docs = append(docs, out)
+	input, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
 	}
 
-	return docs, nil
+	textDocs, errText := SplitDocumentsText(bytes.NewReader(input))
+	decEncDocs, errDecEnc := SplitDocumentsDecEnc(bytes.NewReader(input))
+
+	if errDecEnc == nil && len(decEncDocs) != len(textDocs) {
+		return decEncDocs, nil
+	}
+
+	return textDocs, errText
 }
