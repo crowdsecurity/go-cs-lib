@@ -11,6 +11,7 @@ linters:
     - inamedparam           # reports interfaces with unnamed method parameters
     - wrapcheck             # Checks that errors returned from external packages are wrapped
     - err113                # Go linter to check the errors handling expressions
+    #- noinlineerr
     - paralleltest          # Detects missing usage of t.Parallel() method in your Go test
     - testpackage           # linter that makes you use a separate _test package
     - exhaustruct           # Checks if all structure fields are initialized
@@ -27,13 +28,14 @@ linters:
     - gocognit  # revive
     - gocyclo   # revive
     - lll       # revive
+    - wsl       # wsl_v5
 
     #
     # Formatting only, useful in IDE but should not be forced on CI?
     #
 
     - nlreturn              # nlreturn checks for a new line before return and branch statements to increase code clarity
-    - wsl                   # add or remove empty lines
+    #- wsl_v5                # add or remove empty lines
 
   settings:
 
@@ -41,7 +43,7 @@ linters:
       rules:
         yaml:
           files:
-            - 'yamlpatch/patcher.go'
+            - '!**/yamlpatch/patcher.go'
           deny:
             - pkg: gopkg.in/yaml.v2
               desc: yaml.v2 is deprecated for new code in favor of yaml.v3
@@ -102,6 +104,8 @@ linters:
             - 43
         - name: defer
           disabled: true
+        #- name: enforce-switch-style
+        #  disabled: true
         - name: flag-parameter
           disabled: true
         - name: function-length

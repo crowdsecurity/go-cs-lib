@@ -1,4 +1,4 @@
-package yamlpatch
+package csyaml
 
 import (
 	"bytes"
@@ -7,8 +7,8 @@ import (
 	"io"
 	"os"
 
-	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
+	"github.com/goccy/go-yaml"
+	"github.com/sirupsen/logrus"
 )
 
 type Patcher struct {
@@ -17,7 +17,6 @@ type Patcher struct {
 	quiet         bool
 }
 
-// Deprecated: use csyaml.NewPatcher instead.
 func NewPatcher(filePath string, suffix string) *Patcher {
 	return &Patcher{
 		BaseFilePath:  filePath,
@@ -41,7 +40,7 @@ func readYAML(filePath string) ([]byte, error) {
 	var yamlMap map[any]any
 
 	if err = yaml.Unmarshal(content, &yamlMap); err != nil {
-		return nil, fmt.Errorf("%s: %w", filePath, err)
+		return nil, fmt.Errorf("%s: %s", filePath, yaml.FormatError(err, false, false))
 	}
 
 	return content, nil
@@ -64,16 +63,16 @@ func (p *Patcher) MergedPatchContent() ([]byte, error) {
 		return nil, err
 	}
 
-	logf := log.Infof
+	logf := logrus.Infof
 	if p.quiet {
-		logf = log.Debugf
+		logf = logrus.Debugf
 	}
 
 	logf("Loading yaml file: '%s' with additional values from '%s'", p.BaseFilePath, p.PatchFilePath)
 
 	// strict mode true, will raise errors for duplicate map keys and
 	// overriding with a different type
-	patched, err := YAML([][]byte{base, over}, true)
+	patched, err := Merge([][]byte{base, over})
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +83,7 @@ func (p *Patcher) MergedPatchContent() ([]byte, error) {
 // read multiple YAML documents inside a file, and writes them to a buffer
 // separated by the appropriate '---' terminators.
 func decodeDocuments(file *os.File, buf *bytes.Buffer, finalDashes bool) error {
-	dec := yaml.NewDecoder(file)
-	dec.SetStrict(true)
+	dec := yaml.NewDecoder(file, yaml.Strict())
 
 	dashTerminator := false
 
@@ -98,7 +96,7 @@ func decodeDocuments(file *os.File, buf *bytes.Buffer, finalDashes bool) error {
 				break
 			}
 
-			return fmt.Errorf("while decoding %s: %w", file.Name(), err)
+			return fmt.Errorf("while decoding %s: %s", file.Name(), yaml.FormatError(err, false, false))
 		}
 
 		docBytes, err := yaml.Marshal(&yml)
@@ -139,10 +137,10 @@ func (p *Patcher) PrependedPatchContent() ([]byte, error) {
 			return nil, err
 		}
 
-		logf := log.Infof
+		logf := logrus.Infof
 
 		if p.quiet {
-			logf = log.Debugf
+			logf = logrus.Debugf
 		}
 
 		logf("Prepending yaml: '%s' with '%s'", p.BaseFilePath, p.PatchFilePath)
