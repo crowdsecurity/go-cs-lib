@@ -44,7 +44,7 @@ func Merge(inputs [][]byte) (*bytes.Buffer, error) {
 	}
 
 	buf := &bytes.Buffer{}
-	if !hasContent {
+	if merged == nil && !hasContent {
 		return buf, nil
 	}
 

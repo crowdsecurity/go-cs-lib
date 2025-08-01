@@ -89,10 +89,9 @@ func TestEmptyVsNilSources(t *testing.T) {
 		{"empty override", [][]byte{[]byte("foo: bar\n"), nil}, "foo: bar\n"},
 		{"both empty", [][]byte{nil, nil}, ""},
 		{"null base", [][]byte{[]byte("~\n"), []byte("foo: bar\n")}, "foo: bar\n"},
-		// not interested in overriding a document with "null", but it can be used as a base, why not
-		{"null wont't override", [][]byte{[]byte("foo: bar\n"), []byte("~\n")}, "foo: bar\n"},
-		{"empty base & null override", [][]byte{nil, []byte("~\n")}, ""},
-		{"null base & empty override", [][]byte{[]byte("~\n"), nil}, ""},
+		{"explicit null override", [][]byte{[]byte("foo: bar\n"), []byte("~\n")}, "null\n"},
+		{"empty base & null override", [][]byte{nil, []byte("~\n")}, "null\n"},
+		{"null base & empty override", [][]byte{[]byte("~\n"), nil}, "null\n"},
 	}
 
 	for _, tt := range tests {
