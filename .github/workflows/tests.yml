@@ -26,7 +26,7 @@ jobs:
 
     - name: Run unit tests
       run: |
-        go install gotest.tools/gotestsum@v1.12.1
+        go install gotest.tools/gotestsum@v1.12.3
         gotestsum --format github-actions
       env:
         RICHGO_FORCE_COLOR: 1
