@@ -4,18 +4,19 @@ import (
 	"github.com/shirou/gopsutil/v4/host"
 )
 
-func DetectOS() (string, string) {
+func DetectOS() (string, string, string) {
 	info, err := host.Info()
 	if err != nil {
-		return System, "???"
+		return System, "???", "???"
 	}
 
-	name := info.Platform
+	platform := info.Platform
+	family := info.PlatformFamily
 	version := info.PlatformVersion
 
-	if name != "" && System == "docker" {
-		return name + " (docker)", version
+	if platform != "" && System == "docker" {
+		return platform + " (docker)", family, version
 	}
 
-	return name, version
+	return platform, family, version
 }
