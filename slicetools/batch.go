@@ -3,7 +3,7 @@ package slicetools
 import "context"
 
 // a simple alternative to slices.Chunk (or slicetools.Chunks)
-// if you need no allocations, context cancelation and no parallelism
+// if you want no allocations, context cancelation and no parallelism
 //
 // also: doesn't panic for batchSize = 0
 
