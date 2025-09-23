@@ -22,7 +22,9 @@ import (
 // Always runs in strict mode: type mismatches or duplicate keys cause an error.
 func Merge(inputs [][]byte) (*bytes.Buffer, error) {
 	var merged any
+
 	hasContent := false
+
 	for idx, data := range inputs {
 		dec := yaml.NewDecoder(bytes.NewReader(data), yaml.UseOrderedMap(), yaml.Strict())
 
@@ -31,8 +33,10 @@ func Merge(inputs [][]byte) (*bytes.Buffer, error) {
 			if errors.Is(err, io.EOF) {
 				continue
 			}
+
 			return nil, fmt.Errorf("decoding document %d: %s", idx, yaml.FormatError(err, false, false))
 		}
+
 		hasContent = true
 
 		mergedValue, err := mergeValue(merged, value)
@@ -91,8 +95,10 @@ func mergeValue(into, from any) (any, error) {
 func mergeMap(into, from yaml.MapSlice) (yaml.MapSlice, error) {
 	out := make(yaml.MapSlice, len(into))
 	copy(out, into)
+
 	for _, item := range from {
 		matched := false
+
 		for i, existing := range out {
 			if !reflect.DeepEqual(existing.Key, item.Key) {
 				continue
@@ -102,13 +108,16 @@ func mergeMap(into, from yaml.MapSlice) (yaml.MapSlice, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			out[i].Value = mergedVal
 			matched = true
 		}
+
 		if !matched {
 			out = append(out, yaml.MapItem{Key: item.Key, Value: item.Value})
 		}
 	}
+
 	return out, nil
 }
 
@@ -126,8 +135,10 @@ func describe(i any) string {
 	if isMapping(i) {
 		return "mapping"
 	}
+
 	if isSequence(i) {
 		return "sequence"
 	}
+
 	return "scalar"
 }
