@@ -34,6 +34,7 @@ func SplitDocumentsDecEnc(r io.Reader) ([][]byte, error) {
 
 		enc := yaml.NewEncoder(&buf)
 		enc.SetIndent(2)
+
 		if err := enc.Encode(&node); err != nil {
 			return nil, fmt.Errorf("encode doc %d: %w", idx, err)
 		}

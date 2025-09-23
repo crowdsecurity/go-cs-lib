@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 // SetAWSTestEnv sets the environment variables required to run tests against LocalStack,
@@ -30,7 +31,9 @@ func SetAWSTestEnv(t *testing.T) string {
 	t.Setenv("AWS_ACCESS_KEY_ID", "test")
 	t.Setenv("AWS_SECRET_ACCESS_KEY", "test")
 
-	_, err := net.Dial("tcp", strings.TrimPrefix(endpoint, "http://"))
+	dialer := &net.Dialer{Timeout: 2 * time.Second}
+
+	_, err := dialer.DialContext(t.Context(), "tcp", strings.TrimPrefix(endpoint, "http://"))
 	if err != nil {
 		t.Fatalf("%s: make sure localstack is running and retry", err)
 	}

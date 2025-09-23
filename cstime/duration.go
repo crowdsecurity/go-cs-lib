@@ -20,11 +20,14 @@ type DurationWithDays time.Duration
 // UnmarshalText implements encoding.TextUnmarshaler (used by YAML/JSON libs).
 func (d *DurationWithDays) UnmarshalText(text []byte) error {
 	s := string(text)
+
 	dur, err := ParseDurationWithDays(s)
 	if err != nil {
 		return err
 	}
+
 	*d = DurationWithDays(dur)
+
 	return nil
 }
 
@@ -39,6 +42,7 @@ func (d *DurationWithDays) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &s); err != nil {
 		return err
 	}
+
 	return d.UnmarshalText([]byte(s))
 }
 
@@ -48,6 +52,7 @@ func (d DurationWithDays) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return json.Marshal(string(s))
 }
 

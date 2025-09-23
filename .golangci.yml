@@ -11,7 +11,7 @@ linters:
     - inamedparam           # reports interfaces with unnamed method parameters
     - wrapcheck             # Checks that errors returned from external packages are wrapped
     - err113                # Go linter to check the errors handling expressions
-    #- noinlineerr
+    - noinlineerr
     - paralleltest          # Detects missing usage of t.Parallel() method in your Go test
     - testpackage           # linter that makes you use a separate _test package
     - exhaustruct           # Checks if all structure fields are initialized
@@ -104,15 +104,15 @@ linters:
             - 43
         - name: defer
           disabled: true
-        #- name: enforce-switch-style
-        #  disabled: true
+        - name: enforce-switch-style
+          disabled: true
         - name: flag-parameter
           disabled: true
         - name: function-length
           arguments:
             # lower this after refactoring
             - 104
-            - 196
+            - 198
         - name: line-length-limit
           arguments:
             # lower this after refactoring
