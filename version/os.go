@@ -1,18 +1,22 @@
 package version
 
 import (
-	"github.com/blackfireio/osinfo"
+	"github.com/shirou/gopsutil/v4/host"
 )
 
-func DetectOS() (string, string) {
-	osInfo, err := osinfo.GetOSInfo()
+func DetectOS() (string, string, string) {
+	info, err := host.Info()
 	if err != nil {
-		return System, "???"
+		return System, "???", "???"
 	}
 
-	if osInfo.Name != "" && System == "docker" {
-		return osInfo.Name + " (docker)", osInfo.Version
+	platform := info.Platform
+	family := info.PlatformFamily
+	version := info.PlatformVersion
+
+	if platform != "" && System == "docker" {
+		return platform + " (docker)", family, version
 	}
 
-	return osInfo.Name, osInfo.Version
+	return platform, family, version
 }

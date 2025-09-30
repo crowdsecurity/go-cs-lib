@@ -35,7 +35,7 @@ linters:
     #
 
     - nlreturn              # nlreturn checks for a new line before return and branch statements to increase code clarity
-    #- wsl_v5                # add or remove empty lines
+    - wsl_v5                # add or remove empty lines
 
   settings:
 
