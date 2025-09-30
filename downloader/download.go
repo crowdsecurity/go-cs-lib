@@ -282,6 +282,7 @@ func (d *Downloader) isLocalFresh(ctx context.Context, url string, modTime time.
 		if !localIsOld {
 			d.logger.Debugf("No last modified header, but local file is not old: %s",
 				d.destPath)
+
 			return true, nil
 		}
 
@@ -298,6 +299,7 @@ func (d *Downloader) isLocalFresh(ctx context.Context, url string, modTime time.
 	if modTime.After(lastAvailable) {
 		d.logger.Debugf("Local file is newer than remote: %s (%s vs %s)",
 			d.destPath, modTime, lastAvailable)
+
 		return true, nil
 	}
 
@@ -461,6 +463,7 @@ func compareFiles(file1, file2 string) (bool, error) {
 	defer f2.Close()
 
 	const bufSize = 4096
+
 	buf1 := make([]byte, bufSize)
 	buf2 := make([]byte, bufSize)
 
@@ -580,6 +583,7 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 		}
 
 		defer gzipReader.Close()
+
 		reader = gzipReader
 	}
 
@@ -601,6 +605,7 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 	}
 
 	tmpFileName := tmpFile.Name()
+
 	defer func() {
 		_ = tmpFile.Close()
 		_ = os.Remove(tmpFileName)

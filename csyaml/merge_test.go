@@ -68,6 +68,7 @@ func TestMergeYAML(t *testing.T) {
 
 			buf, err := csyaml.Merge(bs)
 			cstest.RequireErrorContains(t, err, tc.wantErr)
+
 			if tc.wantErr != "" {
 				require.Nil(t, buf)
 				return

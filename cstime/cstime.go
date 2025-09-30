@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// ParseDuration parses a string representing a duration, and supports
+// ParseDurationWithDays parses a string representing a duration, and supports
 // days as a unit (e.g., "2d", "2d3h", "24h", "2h45m").
 func ParseDurationWithDays(input string) (time.Duration, error) {
 	var total time.Duration
@@ -55,6 +55,7 @@ func ParseDurationWithDays(input string) (time.Duration, error) {
 		if err != nil {
 			return 0, err
 		}
+
 		total += dur
 	}
 

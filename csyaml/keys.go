@@ -30,8 +30,10 @@ func GetDocumentKeys(r io.Reader) ([][]string, error) {
 			if errors.Is(err, io.EOF) {
 				break
 			}
+
 			return nil, fmt.Errorf("position %d: %s", idx, yaml.FormatError(err, false, false))
 		}
+
 		keys := []string{}
 
 		// Only mapping nodes become MapSlice with UseOrderedMap()

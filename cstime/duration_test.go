@@ -59,11 +59,14 @@ func TestUnmarshalText(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			var d DurationWithDays
+
 			err := d.UnmarshalText([]byte(tc.input))
 			cstest.RequireErrorContains(t, err, tc.wantErr)
+
 			if tc.wantErr != "" {
 				return
 			}
+
 			assert.Equal(t, tc.want, time.Duration(d))
 		})
 	}
@@ -115,6 +118,7 @@ func TestDuration_UnmarshalJSON(t *testing.T) {
 	jsonInput := `{"timeout": "2d3h45m"}`
 
 	var cfg Config
+
 	err := json.Unmarshal([]byte(jsonInput), &cfg)
 	require.NoError(t, err)
 
@@ -130,6 +134,7 @@ func TestDuration_UnmarshalYAML(t *testing.T) {
 	yamlInput := "timeout: 2d3h45m"
 
 	var cfg Config
+
 	err := yaml.Unmarshal([]byte(yamlInput), &cfg)
 	require.NoError(t, err)
 
