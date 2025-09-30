@@ -1,10 +1,3 @@
-// Package merge implements a deep-merge over multiple YAML documents,
-// preserving key order and rejecting invalid documents.
-//
-// Maps are deep-merged; sequences and scalars are replaced by later inputs.
-// Type mismatches result in an error.
-//
-// Adapted from https://github.com/uber-go/config/tree/master/internal/merge
 package csyaml
 
 import (
@@ -17,9 +10,15 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-// Merge reads each YAML source in inputs, merges them in order (later
-// sources override earlier), and returns the result as a bytes.Buffer.
-// Always runs in strict mode: type mismatches or duplicate keys cause an error.
+// Merge implements a deep-merge over multiple YAML documents, preserving key
+// order and rejecting invalid documents.
+// Always runs in strict mode: type mismatches or duplicate keys cause an
+// error.
+//
+// Maps are deep-merged; sequences and scalars are replaced by later inputs.
+// Type mismatches result in an error.
+//
+// Adapted from https://github.com/uber-go/config/tree/master/internal/merge
 func Merge(inputs [][]byte) (*bytes.Buffer, error) {
 	var merged any
 
