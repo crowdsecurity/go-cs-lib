@@ -75,30 +75,3 @@ func TestNotNil(t *testing.T) {
 		})
 	}
 }
-
-/*
-func TestNotEmptyOrNil(t *testing.T) {
-	tests := []struct{have []*int; want *int}{
-		{[]*int{}, nil},
-		{[]*int{nil, nil, nil}, nil},
-		{[]*int{nil, nil, ptr.Of(3)}, ptr.Of(3)},
-		{[]*int{nil, ptr.Of(0), ptr.Of(3)}, ptr.Of(3)},
-		{[]*int{nil, ptr.Of(2), nil}, ptr.Of(2)},
-		{[]*int{ptr.Of(1), nil, nil}, ptr.Of(1)},
-		{[]*int{ptr.Of(1), ptr.Of(2), ptr.Of(3)}, ptr.Of(1)},
-	}
-
-	for _, tc := range tests {
-		tc := tc
-		t.Run(fmt.Sprintf("%v", tc.have), func(t *testing.T) {
-			got := NotEmptyOrNil(tc.have...)
-			if tc.want == nil {
-				require.Nil(t, got)
-				return
-			}
-			require.NotNil(t, got)
-			assert.Equal(t, *tc.want, *got)
-		})
-	}
-}
-*/ //nolint: dupword

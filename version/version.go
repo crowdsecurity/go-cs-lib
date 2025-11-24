@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+//nolint:gochecknoglobals
 var (
 	Version   string                  // = "v0.0.0"
 	BuildDate string                  // = "2023-03-06_09:55:34"
