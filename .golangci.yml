@@ -5,20 +5,18 @@ linters:
   disable:
     - ireturn
     - nilnil
-    - forbidigo
-    - funcorder
-    - mnd                   # An analyzer to detect magic numbers.
-    - inamedparam           # reports interfaces with unnamed method parameters
-    - wrapcheck             # Checks that errors returned from external packages are wrapped
-    - err113                # Go linter to check the errors handling expressions
+    - mnd
+    - wrapcheck
+    - err113
     - noinlineerr
-    - paralleltest          # Detects missing usage of t.Parallel() method in your Go test
-    - testpackage           # linter that makes you use a separate _test package
-    - exhaustruct           # Checks if all structure fields are initialized
-    - gochecknoglobals      # Check that no global variables exist.
-    - goconst               # Finds repeated strings that could be replaced by a constant
-    - tagliatelle           # Checks the struct tags.
-    - varnamelen            # checks that the length of a variable's name matches its scope
+    - paralleltest
+    - testpackage
+    - exhaustruct
+    - goconst
+    - varnamelen
+    - nonamedreturns
+    - nlreturn
+    - wsl_v5
 
     #
     # Redundant
@@ -29,13 +27,6 @@ linters:
     - gocyclo   # revive
     - lll       # revive
     - wsl       # wsl_v5
-
-    #
-    # Formatting only, useful in IDE but should not be forced on CI?
-    #
-
-    - nlreturn              # nlreturn checks for a new line before return and branch statements to increase code clarity
-    - wsl_v5                # add or remove empty lines
 
   settings:
 
@@ -49,11 +40,10 @@ linters:
               desc: yaml.v2 is deprecated for new code in favor of yaml.v3
 
     errcheck:
-      # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
-      # Such cases aren't reported by default.
-      check-type-assertions: false
-      # List of functions to exclude from checking, where each entry is a single function to exclude.
-      # See https://github.com/kisielk/errcheck#excluding-functions for details.
+      check-type-assertions: true
+
+    funcorder:
+      struct-method: false
 
     gocritic:
       enable-all: true
@@ -61,7 +51,6 @@ linters:
         - paramTypeCombine
         - sloppyReassign
         - commentedOutCode
-        - unnamedResult
         - whyNoLint
 
     govet:
@@ -84,6 +73,18 @@ linters:
       require-specific: false     # don't require nolint directives to be specific about which linter is being skipped
       allow-unused: false         # report any unused nolint directives
 
+    recvcheck:
+      exclusions:
+        # methods from time.Duration and pflag.Value don't use the same type of receiver.
+        - DurationWithDays.Set
+        - DurationWithDays.String
+        - DurationWithDays.Type
+        - DurationWithDays.Hours
+        - DurationWithDays.Minutes
+        - DurationWithDays.Seconds
+        - DurationWithDays.Milliseconds
+        - DurationWithDays.Nanoseconds
+
     revive:
       severity: error
       enable-all-rules: true
@@ -94,18 +95,10 @@ linters:
           arguments:
             # lower this after refactoring
             - 46
-        - name: comment-spacings
-          disabled: true
-        - name: confusing-results
-          disabled: true
         - name: cyclomatic
           arguments:
             # lower this after refactoring
             - 43
-        - name: defer
-          disabled: true
-        - name: enforce-switch-style
-          disabled: true
         - name: flag-parameter
           disabled: true
         - name: function-length
@@ -126,10 +119,6 @@ linters:
       checks:
         - all
 
-    wsl:
-      # Allow blocks to end with comments
-      allow-trailing-comment: true
-
   exclusions:
     presets:
       - comments
@@ -138,27 +127,23 @@ linters:
       - std-error-handling
     rules:
 
-      # `err` is often shadowed, we may continue to do it
       - linters:
           - govet
-        text: 'shadow: declaration of "(err|ctx)" shadows declaration'
+        text: 'shadow: declaration of "err" shadows declaration'
 
-      # tolerate long functions in tests
       - linters:
           - revive
         path: (.+)/(.+)_test.go
         text: 'function-length: .*'
 
-      # tolerate long lines in tests
       - linters:
           - revive
         path: (.+)/(.+)_test.go
         text: 'line-length-limit: .*'
 
       - linters:
-          - recvcheck
-        path: cstime/duration.go
-        text: the methods of "DurationWithDays" use pointer receiver and non-pointer receiver.
+          - forbidigo
+        path: downloader/examples/
 
     paths:
       - yamlpatch/merge.go

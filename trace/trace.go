@@ -32,9 +32,9 @@ func Init(dir string) error {
 	return nil
 }
 
-// CatchPanic should be called from all go-routines to ensure proper stack trace reporting.
+// CatchPanic should be deferred from all go-routines to ensure proper stack trace reporting.
 func CatchPanic(component string) {
-	if r := recover(); r != nil {
+	if r := recover(); r != nil { //nolint:revive
 		keeper.handlePanic(component, r)
 	}
 }
@@ -57,6 +57,7 @@ type traceKeeper struct {
 	keepMaxFiles  int           // delete oldest files if there are more than this
 }
 
+//nolint:gochecknoglobals
 var keeper = &traceKeeper{
 	mutex:         &sync.Mutex{},
 	dir:           os.TempDir(),

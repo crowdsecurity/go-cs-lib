@@ -190,7 +190,7 @@ func TestBooleanNoCoercion(t *testing.T) {
 //			assert.Equal(t, tt.out, buf.String())
 //		})
 //	}
-//}
+// }
 
 func TestExplicitNilOverride(t *testing.T) {
 	base := []byte("foo: {one: two}\n")
