@@ -34,7 +34,9 @@ func Init(dir string) error {
 
 // CatchPanic should be called from all go-routines to ensure proper stack trace reporting.
 func CatchPanic(component string) {
-	keeper.catchPanic(component)
+	if r := recover(); r != nil {
+		keeper.handlePanic(component, r)
+	}
 }
 
 // WriteStackTrace writes a stack trace to a file and returns the path.
@@ -156,12 +158,7 @@ func (tk *traceKeeper) writeStackTrace(iErr any) (string, error) {
 	return tmpfile.Name(), nil
 }
 
-func (tk *traceKeeper) catchPanic(component string) {
-	r := recover()
-	if r == nil {
-		return
-	}
-
+func (tk *traceKeeper) handlePanic(component string, r any) {
 	log.Errorf("crowdsec - goroutine %s crashed: %s", component, r)
 	log.Error("please report this error to https://github.com/crowdsecurity/crowdsec/issues")
 
