@@ -43,7 +43,7 @@ linters:
       check-type-assertions: true
 
     funcorder:
-      struct-method: false
+      struct-method: true
 
     gocritic:
       enable-all: true
