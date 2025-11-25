@@ -215,116 +215,12 @@ func (d *Downloader) AfterRequest(fn func(*http.Response)) *Downloader {
 	return d
 }
 
-// getDestInfo returns the modification time and file mode of the destination file.
-func (d *Downloader) getDestInfo() (time.Time, fs.FileMode) {
-	dstInfo, err := os.Stat(d.destPath)
-
-	switch {
-	case os.IsNotExist(err):
-		return time.Time{}, 0
-	case err != nil:
-		d.logger.Errorf("Failed to stat destination file %s: %s", d.destPath, err)
-		return time.Time{}, 0
-	}
-
-	return dstInfo.ModTime(), dstInfo.Mode().Perm()
-}
-
-// isLocalFresh returns whether we can skip the download, according to mtime and etag values, when set.
-// If neither is set, the file is considered stale after the shelf life period.
-func (d *Downloader) isLocalFresh(ctx context.Context, url string, modTime time.Time, etag string) (bool, error) {
-	if !d.lastModified && d.etagFn == nil {
-		return false, nil
-	}
-
-	localIsOld := true
-
-	if d.shelfLife != 0 {
-		localIsOld = modTime.Add(d.shelfLife).Before(time.Now())
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, http.NoBody)
-	if err != nil {
-		return false, fmt.Errorf("failed to create HEAD request for %s: %w", url, err)
-	}
-
-	if etag != "" {
-		req.Header.Add("If-None-Match", etag)
-	}
-
-	client := d.httpClient
-	if client == nil {
-		client = http.DefaultClient
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return false, fmt.Errorf("failed to make HEAD request for %s: %w", url, err)
-	}
-	defer resp.Body.Close()
-
-	switch resp.StatusCode {
-	case http.StatusNotModified:
-		d.logger.Debug("Not modified (head)")
-		return true, nil
-	case http.StatusOK:
-		break
-	default:
-		return false, BadHTTPCodeError{url, resp.StatusCode}
-	}
-
-	if !d.lastModified {
-		return false, nil
-	}
-
-	remoteLastModified := resp.Header.Get("Last-Modified")
-	if remoteLastModified == "" {
-		if !localIsOld {
-			d.logger.Debugf("No last modified header, but local file is not old: %s",
-				d.destPath)
-
-			return true, nil
-		}
-
-		d.logger.Debugf("No last modified header: %s", d.destPath)
-
-		return false, nil
-	}
-
-	lastAvailable, err := time.Parse(http.TimeFormat, remoteLastModified)
-	if err != nil {
-		d.logger.Errorf("Failed to parse last modified header '%s': %s", remoteLastModified, err)
-	}
-
-	if modTime.After(lastAvailable) {
-		d.logger.Debugf("Local file is newer than remote: %s (%s vs %s)",
-			d.destPath, modTime, lastAvailable)
-
-		return true, nil
-	}
-
-	return false, nil
-}
-
 // VerifyHash sets the hash function and value to check the downloaded file against.
 func (d *Downloader) VerifyHash(hashFunction, hashValue string) *Downloader {
 	d.verifyHashFunction = hashFunction
 	d.verifyHashValue = hashValue
 
 	return d
-}
-
-func (d *Downloader) selectHashFunction() (hash.Hash, error) {
-	switch d.verifyHashFunction {
-	case "sha256":
-		return crypto.SHA256.New(), nil
-	case "md5":
-		return crypto.MD5.New(), nil
-	case "":
-		return nil, nil
-	default:
-		return nil, fmt.Errorf("unsupported hash function %s", d.verifyHashFunction)
-	}
 }
 
 // ValidateOptions checks that the downloader options are consistent. This is called by Download().
@@ -482,22 +378,6 @@ func compareFiles(file1, file2 string) (bool, error) {
 			return false, nil
 		}
 	}
-}
-
-// getETag returns the ETag to send with If-None-Match, only if the destination file exists.
-func (d *Downloader) getETag(destModTime time.Time) (string, error) {
-	etag := ""
-	// the destination could have been deleted leaving an .etag
-	if d.etagFn != nil && (destModTime != time.Time{}) {
-		var err error
-
-		etag, err = (*d.etagFn)(d.destPath)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	return etag, nil
 }
 
 // Download downloads the file from the URL to the destination path.
@@ -724,4 +604,124 @@ func (d *Downloader) enforceMaxSize(resp *http.Response) error {
 	}
 
 	return nil
+}
+
+// getDestInfo returns the modification time and file mode of the destination file.
+func (d *Downloader) getDestInfo() (time.Time, fs.FileMode) {
+	dstInfo, err := os.Stat(d.destPath)
+
+	switch {
+	case os.IsNotExist(err):
+		return time.Time{}, 0
+	case err != nil:
+		d.logger.Errorf("Failed to stat destination file %s: %s", d.destPath, err)
+		return time.Time{}, 0
+	}
+
+	return dstInfo.ModTime(), dstInfo.Mode().Perm()
+}
+
+// getETag returns the ETag to send with If-None-Match, only if the destination file exists.
+func (d *Downloader) getETag(destModTime time.Time) (string, error) {
+	etag := ""
+	// the destination could have been deleted leaving an .etag
+	if d.etagFn != nil && (destModTime != time.Time{}) {
+		var err error
+
+		etag, err = (*d.etagFn)(d.destPath)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return etag, nil
+}
+
+// isLocalFresh returns whether we can skip the download, according to mtime and etag values, when set.
+// If neither is set, the file is considered stale after the shelf life period.
+func (d *Downloader) isLocalFresh(ctx context.Context, url string, modTime time.Time, etag string) (bool, error) {
+	if !d.lastModified && d.etagFn == nil {
+		return false, nil
+	}
+
+	localIsOld := true
+
+	if d.shelfLife != 0 {
+		localIsOld = modTime.Add(d.shelfLife).Before(time.Now())
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, http.NoBody)
+	if err != nil {
+		return false, fmt.Errorf("failed to create HEAD request for %s: %w", url, err)
+	}
+
+	if etag != "" {
+		req.Header.Add("If-None-Match", etag)
+	}
+
+	client := d.httpClient
+	if client == nil {
+		client = http.DefaultClient
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, fmt.Errorf("failed to make HEAD request for %s: %w", url, err)
+	}
+	defer resp.Body.Close()
+
+	switch resp.StatusCode {
+	case http.StatusNotModified:
+		d.logger.Debug("Not modified (head)")
+		return true, nil
+	case http.StatusOK:
+		break
+	default:
+		return false, BadHTTPCodeError{url, resp.StatusCode}
+	}
+
+	if !d.lastModified {
+		return false, nil
+	}
+
+	remoteLastModified := resp.Header.Get("Last-Modified")
+	if remoteLastModified == "" {
+		if !localIsOld {
+			d.logger.Debugf("No last modified header, but local file is not old: %s",
+				d.destPath)
+
+			return true, nil
+		}
+
+		d.logger.Debugf("No last modified header: %s", d.destPath)
+
+		return false, nil
+	}
+
+	lastAvailable, err := time.Parse(http.TimeFormat, remoteLastModified)
+	if err != nil {
+		d.logger.Errorf("Failed to parse last modified header '%s': %s", remoteLastModified, err)
+	}
+
+	if modTime.After(lastAvailable) {
+		d.logger.Debugf("Local file is newer than remote: %s (%s vs %s)",
+			d.destPath, modTime, lastAvailable)
+
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (d *Downloader) selectHashFunction() (hash.Hash, error) {
+	switch d.verifyHashFunction {
+	case "sha256":
+		return crypto.SHA256.New(), nil
+	case "md5":
+		return crypto.MD5.New(), nil
+	case "":
+		return nil, nil
+	default:
+		return nil, fmt.Errorf("unsupported hash function %s", d.verifyHashFunction)
+	}
 }
