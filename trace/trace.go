@@ -33,9 +33,9 @@ func Init(dir string) error {
 }
 
 // CatchPanic should be deferred from all go-routines to ensure proper stack trace reporting.
-func CatchPanic(component string) {
-	if r := recover(); r != nil { //nolint:revive
-		keeper.handlePanic(component, r)
+func CatchPanic(funcName string) {
+	if r := recover(); r != nil {
+		keeper.handlePanic(funcName, r)
 	}
 }
 
