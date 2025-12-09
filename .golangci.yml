@@ -3,7 +3,6 @@ version: "2"
 linters:
   default: all
   disable:
-    - ireturn
     - nilnil
     - mnd
     - wrapcheck
@@ -109,7 +108,7 @@ linters:
         - name: line-length-limit
           arguments:
             # lower this after refactoring
-            - 190
+            - 114
         - name: unnecessary-stmt
           disabled: true
         - name: useless-break
@@ -134,12 +133,12 @@ linters:
       - linters:
           - revive
         path: (.+)/(.+)_test.go
-        text: 'function-length: .*'
+        text: 'line-length-limit: .*'
 
       - linters:
           - revive
-        path: (.+)/(.+)_test.go
-        text: 'line-length-limit: .*'
+        path: trace/trace.go
+        text: "defer: recover must be called inside a deferred function"
 
       - linters:
           - forbidigo
