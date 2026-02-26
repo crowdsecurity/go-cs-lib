@@ -181,7 +181,7 @@ func (tk *traceKeeper) handlePanic(component string, r any) {
 		log.Errorf("unable to write stacktrace: %s", err)
 	}
 
-	log.Info(string(debug.Stack()))
+	log.Error(string(debug.Stack()))
 
 	log.Fatalf("crowdsec stopped unexpectedly. A stacktrace/report is written to %s: please join it to your issue", filename) //nolint:revive // intentional deep-exit
 }
