@@ -34,7 +34,8 @@ func Init(dir string) error {
 
 // CatchPanic should be deferred from all go-routines to ensure proper stack trace reporting.
 //
-// Deprecated: Use ReportPanic instead, the funcName parameter doesn't add useful information in addition to the trace.
+// Deprecated: Use ReportPanic instead, the funcName parameter doesn't add useful information
+// in addition to the trace.
 func CatchPanic(funcName string) {
 	if r := recover(); r != nil {
 		keeper.handlePanic(funcName, r)

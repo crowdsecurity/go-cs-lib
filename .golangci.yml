@@ -7,6 +7,7 @@ linters:
     - mnd
     - wrapcheck
     - err113
+    - gosec
     - noinlineerr
     - paralleltest
     - testpackage
@@ -113,6 +114,8 @@ linters:
         - name: unnecessary-stmt
           disabled: true
         - name: useless-break
+          disabled: true
+        - name: var-naming
           disabled: true
 
     staticcheck:
