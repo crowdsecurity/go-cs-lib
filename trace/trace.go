@@ -33,9 +33,18 @@ func Init(dir string) error {
 }
 
 // CatchPanic should be deferred from all go-routines to ensure proper stack trace reporting.
+//
+// Deprecated: Use ReportPanic instead, the funcName parameter doesn't add useful information in addition to the trace.
 func CatchPanic(funcName string) {
 	if r := recover(); r != nil {
 		keeper.handlePanic(funcName, r)
+	}
+}
+
+// ReportPanic should be deferred from all go-routines to ensure proper stack trace reporting.
+func ReportPanic() {
+	if r := recover(); r != nil {
+		keeper.handlePanic("", r)
 	}
 }
 
@@ -160,7 +169,11 @@ func (tk *traceKeeper) writeStackTrace(iErr any) (string, error) {
 }
 
 func (tk *traceKeeper) handlePanic(component string, r any) {
-	log.Errorf("crowdsec - goroutine %s crashed: %s", component, r)
+	if component != "" {
+		component += " "
+	}
+
+	log.Errorf("crowdsec - goroutine %scrashed: %s", component, r)
 	log.Error("please report this error to https://github.com/crowdsecurity/crowdsec/issues")
 
 	filename, err := tk.writeStackTrace(r)
@@ -168,6 +181,5 @@ func (tk *traceKeeper) handlePanic(component string, r any) {
 		log.Errorf("unable to write stacktrace: %s", err)
 	}
 
-	log.Errorf("stacktrace/report is written to %s: please join it to your issue", filename)
-	log.Fatal("crowdsec stopped") //nolint:revive // intentional deep-exit
+	log.Fatalf("crowdsec stopped unexpectedly. A stacktrace/report is written to %s: please join it to your issue", filename) //nolint:revive // intentional deep-exit
 }
