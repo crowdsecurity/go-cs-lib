@@ -1,6 +1,7 @@
 package trace
 
 import (
+	"bytes"
 	"os"
 	"sync"
 	"testing"
@@ -39,6 +40,24 @@ func disableLogFatalExit(t *testing.T) {
 	t.Cleanup(func() {
 		logger.ExitFunc = previousExitFunc
 	})
+}
+
+func captureLogOutput(t *testing.T) *bytes.Buffer {
+	t.Helper()
+
+	logger := log.StandardLogger()
+	previousOutput := logger.Out
+	previousLevel := logger.GetLevel()
+	output := &bytes.Buffer{}
+	logger.SetOutput(output)
+	logger.SetLevel(log.InfoLevel)
+
+	t.Cleanup(func() {
+		logger.SetOutput(previousOutput)
+		logger.SetLevel(previousLevel)
+	})
+
+	return output
 }
 
 func TestWriteStackTraceAndList(t *testing.T) {
@@ -91,4 +110,17 @@ func TestCatchPanicRecoversPanic(t *testing.T) {
 	content, err := os.ReadFile(files[0])
 	require.NoError(t, err)
 	assert.Contains(t, string(content), "error: catch-panic-test")
+}
+
+func TestReportPanicLogsStackTrace(t *testing.T) {
+	setupTestKeeper(t)
+	disableLogFatalExit(t)
+	output := captureLogOutput(t)
+
+	func() {
+		defer ReportPanic()
+		panic("report-panic-stack")
+	}()
+
+	assert.Contains(t, output.String(), "runtime/debug.Stack()")
 }
