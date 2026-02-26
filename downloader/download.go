@@ -319,7 +319,7 @@ func storeETag(resp *http.Response, etagPath string, logger *logrus.Entry) {
 		return
 	}
 
-	if err := os.WriteFile(etagPath, []byte(etag), 0o600); err != nil {
+	if err := os.WriteFile(etagPath, []byte(etag), 0o600); err != nil { // #nosec G703
 		logger.Errorf("Failed to write ETag to %s: %s", etagPath, err)
 	}
 }
@@ -347,7 +347,7 @@ func compareFiles(file1, file2 string) (bool, error) {
 
 	defer f1.Close()
 
-	f2, err := os.Open(file2)
+	f2, err := os.Open(file2) // #nosec G703
 
 	switch {
 	case os.IsNotExist(err):
@@ -427,7 +427,7 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 		d.beforeRequest(req)
 	}
 
-	resp, err := d.httpClient.Do(req)
+	resp, err := d.httpClient.Do(req) // #nosec G704
 	if err != nil {
 		return false, fmt.Errorf("failed http request for %s: %w", url, err)
 	}
@@ -576,7 +576,7 @@ func (d *Downloader) Download(ctx context.Context, url string) (bool, error) {
 		}
 	}
 
-	if err = os.Rename(tmpFileName, d.destPath); err != nil {
+	if err = os.Rename(tmpFileName, d.destPath); err != nil { // #nosec G703
 		return false, err
 	}
 
@@ -664,7 +664,7 @@ func (d *Downloader) isLocalFresh(ctx context.Context, url string, modTime time.
 		client = http.DefaultClient
 	}
 
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) // #nosec G704
 	if err != nil {
 		return false, fmt.Errorf("failed to make HEAD request for %s: %w", url, err)
 	}

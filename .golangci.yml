@@ -7,7 +7,6 @@ linters:
     - mnd
     - wrapcheck
     - err113
-    - gosec
     - noinlineerr
     - paralleltest
     - testpackage
