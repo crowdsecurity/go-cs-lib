@@ -16,6 +16,7 @@ linters:
     - nonamedreturns
     - nlreturn
     - wsl_v5
+    - prealloc
 
     #
     # Redundant
@@ -112,6 +113,8 @@ linters:
         - name: unnecessary-stmt
           disabled: true
         - name: useless-break
+          disabled: true
+        - name: var-naming
           disabled: true
 
     staticcheck:
